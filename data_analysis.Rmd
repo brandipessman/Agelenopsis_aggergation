@@ -1,0 +1,355 @@
+---
+title: "Data Wrangling and Statistical Analysis of Assessment of Abundance, Aggregation, and Web Placement of *Agelenopsis pennsylvanica*"
+author: "Brandi Pessman"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## Setting the Working Directory and Global Code Chunk Options
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation")
+```
+
+## Packages to Load
+
+```{r packages, echo = FALSE}
+library(tidyverse) # to use pipelines in data wrangling
+library(ggpubr) # using ggarrange to make multi-panel figures
+library(caret) # used to find correlations between predictor variables
+library(PerformanceAnalytics) # used to make correlation plots
+library(broom) # allows us to use augment when getting predicted values from the model
+library(emmeans) # for calculating predictions for graphing
+```
+
+## Import Data
+
+```{r import}
+webs <- read.table(file = "data/webs.txt", header = TRUE) 
+# includes data for every measured web (multiple per site)
+```
+
+## Data Wrangling
+
+```{r webs_wrangling}
+# Here, we rename some levels of factors Location and Land and put them in the order we want the categories to appear in a graph
+
+webs <- webs %>% 
+  mutate(ID = factor(ID),
+         Location = factor(Location),
+         Location = fct_recode(Location, 
+                               "Urban Forest" = "Forest",
+                               "Urban Center" = "Campus"),
+         Location = fct_relevel(Location, 
+                                "Urban Forest", "Urban Center"),
+         Land = fct_recode(Land, 
+                           "Urban, High" = "UrbanizedHighIntensity",
+                           "Urban, Medium" = "UrbanizedMediumIntensity",
+                           "Urban, Low" = "UrbanizedLowIntensity",
+                           "Deciduous Forest" = "DeciduousForest",
+                           "Woody Wetlands" = "WoodyWetlands"),
+         Land = fct_relevel(Land, 
+                            "Urban, High", 
+                            "Urban, Medium", 
+                            "Urban, Low", 
+                            "Deciduous Forest", 
+                            "Woody Wetlands"),
+         patch_area_km = patch_area_mm * 1e-6) %>% 
+  dplyr::rename("Impervious" = "Imperv", 
+                "Dist_to_Road" = "road_dist_data", 
+                "Traffic_Dist_Road" = "dist_traffic_road", 
+                "Dist_to_Highway" = "highway_dist_m", 
+                "Traffic_Dist_Highway" = "dist_traffic_highway")
+
+sites <- webs %>% 
+  filter(Web == "W001") 
+# Restricted to site data only (only one data point per site)
+```
+
+```{r sites_wrangling}
+# At one time, we tried scaling and centering the data in difference ways. I want to make mention of it here because it might be useful information for me to look back on in the future. Scaling is dividing each datum by the standard deviation of the data and centering is subtracting the mean of the data from each datum to try to normalize the data; a second type of centering and scaling involves subtracting the median and dividing by the interquartile range; need to remember to back transform when making figures; we didn't scale and center because log-transformations on zero-inflated variables were enough to remove convergence errors
+
+sites <- sites %>% 
+  mutate(patch_area_km = patch_area_mm * 1e-6)
+```
+
+```{r location_subsets}
+webs_center <- webs %>% 
+  filter(Location == "Urban Center")
+
+webs_forest <- webs %>% 
+  filter(Location == "Urban Forest")
+
+sites_center <- sites %>% 
+  filter(Location == "Urban Center")
+
+sites_forest <- sites %>% 
+  filter(Location == "Urban Forest")
+```
+
+## Transformation of Variables
+
+Many data are zero-inflated or right skewed. We check the distribution of the data and check distributions after log-transformation for right-skewed data not containing zeros.
+
+```{r graphing_predictor_distributions, echo = FALSE}
+# Here, we graph the distribution of predictor variables in their raw distribution and after log-transformation since all variables are positive values, and many are zero-inflated; we also run shapiro-wilk tests to test for normality including the log-transformed variable if the log-transformed distribution looks better (less skewed)
+
+# use as is, log won't work because some data are zero
+ggplot(sites, aes(x = tree100m)) +
+  geom_density()
+shapiro.test(sites$tree100m) # not normal
+
+# use as is, log won't work because some data are zero
+ggplot(sites, aes(x = imperv100m)) +
+  geom_density()
+shapiro.test(sites$imperv100m) # not normal
+
+# better log-transformed
+ggarrange(ggplot(sites, aes(x = TotalSub)) + 
+            geom_density(), 
+          ggplot(sites, aes(x = log(TotalSub))) +
+            geom_density(), 
+          nrow = 1, 
+          ncol = 2)
+shapiro.test(sites$TotalSub) # not normal
+shapiro.test(log(sites$TotalSub)) # normal
+
+# better log-transformed
+ggarrange(ggplot(sites, aes(x = Traffic_Dist_Road)) + 
+            geom_density(), 
+          ggplot(sites, aes(x = log(Traffic_Dist_Road))) + 
+            geom_density(), 
+          nrow = 1, 
+          ncol = 2)
+shapiro.test(sites$Traffic_Dist_Road) # not normal
+shapiro.test(log(sites$Traffic_Dist_Road)) # normal
+
+# better log-transformed
+ggarrange(ggplot(sites, aes(x = Traffic_Dist_Highway)) + 
+            geom_density(), 
+          ggplot(sites, aes(x = log(Traffic_Dist_Highway))) + 
+            geom_density(), 
+          nrow = 1, 
+          ncol = 2)
+shapiro.test(sites$Traffic_Dist_Highway) # not normal
+shapiro.test(log(sites$Traffic_Dist_Highway)) # almost normal
+
+# looks similar either way
+ggarrange(ggplot(sites, aes(x = spec_rad)) + 
+            geom_density(), 
+          ggplot(sites, aes(x = log(spec_rad))) + 
+            geom_density(), 
+          nrow = 1, 
+          ncol = 2)
+shapiro.test(sites$spec_rad) # not normal
+shapiro.test(log(sites$spec_rad)) # not normal
+
+# looks similar either way, but shapiro tests suggests as is is slightly better
+ggarrange(ggplot(sites, aes(x = light_rad)) + 
+            geom_density(), 
+          ggplot(sites, aes(x = log(light_rad))) + 
+            geom_density(), 
+          nrow = 1, 
+          ncol = 2)
+shapiro.test(sites$light_rad) # not normal
+shapiro.test(log(sites$light_rad)) # not normal
+
+# better log-transformed
+ggarrange(ggplot(sites, aes(x = patch_area_km)) +
+            geom_density(), 
+          ggplot(sites, aes(x = log(patch_area_km))) +
+            geom_density(), 
+          nrow = 1, 
+          ncol = 2)
+shapiro.test(sites$patch_area_km) # not normal
+shapiro.test(log(sites$patch_area_km)) # almost normal
+
+# use as is, log won't work because some data are zero
+ggplot(sites, aes(x = road_length_m)) + 
+  geom_density()
+shapiro.test(sites$road_length_m) # not normal
+
+# use as is, log won't work because some data are zero
+ggplot(sites, aes(x = trail_length_m)) + 
+  geom_density()
+shapiro.test(sites$trail_length_m) # not normal
+
+sites <- sites %>% 
+  mutate(log_TotalSub = log(TotalSub),
+         log_tdr = log(Traffic_Dist_Road),
+         log_tdh = log(Traffic_Dist_Highway),
+         log_patch = log(patch_area_km))
+
+webs <- webs %>% 
+  mutate(log_TotalSub = log(TotalSub),
+         log_tdr = log(Traffic_Dist_Road),
+         log_tdh = log(Traffic_Dist_Highway),
+         log_patch = log(patch_area_km))
+```
+
+We conclude to use log-transformations for TotalSub, Traffic_Dist_Road, Traffic_Dist_Highway, and patch_area_km.
+
+## Variable Reduction Based on Correlations
+
+```{r correlations_overall}
+corr <- sites %>% 
+  select(tree100m, imperv100m, TotalSub, 
+         Traffic_Dist_Road, Traffic_Dist_Highway, 
+         spec_rad, light_rad, patch_area_km, road_length_m)
+# We exclude trail length from global correlations because trail length can only collected in Wilderness Park, and not for UNL City Campus
+
+# When running findCorrelations, we get a vector of variables to remove to reduce pairwise correlations. 
+
+findCorrelation(cor(corr, method = "spearman"), cutoff = .6, verbose = TRUE, names = TRUE) 
+
+# This suggests that we remove tree100m, imperv100, spec_rad, light_rad, patch_area_km, road_length_m
+# That leaves us with TotalSub, Traffic_Dist_Road, and Traffic_Dist_Highway
+
+chart.Correlation(corr, histogram = TRUE, method = "spearman") # kendall, spearman
+
+corr <- sites %>% 
+  select(TotalSub, Traffic_Dist_Road, Traffic_Dist_Highway)
+chart.Correlation(corr, histogram = TRUE, method = "spearman") # kendall, spearman
+
+# Let's also test the variables after transformation
+
+corr_transformed <- sites %>% 
+  select(tree100m, imperv100m, log_TotalSub, 
+         log_tdr, log_tdh, 
+         spec_rad, light_rad, log_patch, road_length_m)
+
+findCorrelation(cor(corr_transformed, method = "spearman"), cutoff = .6, verbose = TRUE, names = TRUE) 
+
+# This suggests to remove tree100m, imperv100m, spec_rad, light_rad, log_patch, and road_length_m.
+
+# This leaves us with log_TotalSub, log_tdr, and log_tdh, the same results as the non-transformed. 
+
+chart.Correlation(corr_transformed, histogram = TRUE, method = "spearman") # kendall, spearman
+
+corr_transformed <- sites %>% 
+  select(log_TotalSub, log_tdr, log_tdh)
+chart.Correlation(corr_transformed, histogram = TRUE, method = "spearman") # kendall, spearman
+```
+
+```{r correlations_forest}
+corr_forest <- sites %>% 
+  filter(Location == "Urban Forest") %>% 
+  select(tree100m, imperv100m, TotalSub, 
+         Traffic_Dist_Road, Traffic_Dist_Highway, 
+         spec_rad, light_rad, patch_area_km, road_length_m, trail_length_m)
+# Notice trail length is included 
+
+findCorrelation(cor(corr_forest, method = "spearman"), cutoff = .6, verbose = TRUE, names = TRUE) 
+# This suggests removing imperv100m, spec_rad, light_rad, road_length_m, and trail_length_m
+# We will keep tree100m, TotalSub, Traffic_Dist_Road, Traffic_Dist_Highway, and patch_area_km
+chart.Correlation(corr_forest, histogram = TRUE, method = "spearman")
+corr_forest <- sites %>% 
+  filter(Location == "Urban Forest") %>% 
+  select(tree100m, TotalSub, Traffic_Dist_Road, patch_area_km, Traffic_Dist_Highway)
+chart.Correlation(corr_forest, histogram = TRUE, method = "spearman")
+
+# Let's try with the log-transformed
+corr_forest_transformed <- sites %>% 
+  filter(Location == "Wilderness Park") %>% 
+  select(tree100m, imperv100m, log_TotalSub, 
+         log_tdr, log_tdh, 
+         spec_rad, light_rad, log_patch, road_length_m, trail_length_m)
+
+findCorrelation(cor(corr_forest_transformed, method = "spearman"), cutoff = .6, verbose = TRUE, names = TRUE) 
+# The same variables are dropped and kept
+
+corr_forest_transformed <- sites %>% 
+  filter(Location == "Urban Forest") %>% 
+  select(tree100m, log_TotalSub, log_tdr, patch_area_km, log_tdh)
+chart.Correlation(corr_forest_transformed, histogram = TRUE, method = "spearman")
+```
+
+```{r correlations_center}
+corr_center <- sites %>% 
+  filter(Location == "Urban Center") %>% 
+  select(tree100m, imperv100m, TotalSub, Traffic_Dist_Road, Traffic_Dist_Highway, spec_rad, light_rad, patch_area_km, road_length_m)
+# Trail length is removed because we could not measure trail length on campus
+
+findCorrelation(cor(corr_center, method = "spearman"), cutoff = .6, verbose = TRUE, names = TRUE) 
+# This suggests that we remove tree100m, imperv100m, and light_rad
+# We will keep TotalSub, Traffic_Dist_Road, Traffic_Dist_Highway, spec_rad, patch_area_km, and road_length_m
+
+chart.Correlation(corr_center, histogram = TRUE, method = "spearman")
+
+# Let's try with the transformed
+corr_center_transformed <- sites %>% 
+  filter(Location == "Urban Center") %>% 
+  select(tree100m, imperv100m, log_TotalSub, log_tdr, log_tdh, spec_rad, light_rad, log_patch, road_length_m)
+findCorrelation(cor(corr_center_transformed, method = "spearman"), cutoff = .6, verbose = TRUE, names = TRUE) 
+chart.Correlation(corr_center_transformed, histogram = TRUE, method = "pearson")
+# The same variables are kept or removed
+```
+
+For overall analysis of predictors, we will include: 
+
+- log_TotalSub
+
+- log_tdr
+
+- log_tdh
+
+For the urban forest subset, we will use: 
+
+- tree100m 
+
+- log_TotalSub 
+
+- log_tdr 
+
+- log_tdh
+
+- log_patch
+
+Finally, for the urban center subset, we will use: 
+
+- log_TotalSub 
+
+- log_tdr 
+
+- log_tdh 
+
+- spec_rad
+
+- log_patch
+
+- road_length_m
+
+## Graphs and Stats Comparing Predictors by Location
+```{r stats_graphs_tree}
+tree100m <- glm(tree100m ~ Location, family = "poisson", data = sites)
+summary(tree100m)
+
+# The following line tells you the mean and standard error of the raw data for tree cover in a 100 m radius of the sites between the two locations
+sites %>% 
+  group_by(Location) %>% 
+  summarize(mean = mean(tree100m),
+            se = plotrix::std.error(tree100m))
+
+predictions <- summary(emmeans(tree100m, ~Location),type = "response")
+
+ggplot(sites, aes(x = Location, y = tree100m)) + 
+  geom_jitter(color = "grey", width = 0.1, size = 1) +
+  geom_point(aes(x = Location, y = rate, color = Location), size = 4, data = predictions) + 
+  geom_errorbar(aes(x = Location, 
+                  ymin = rate - SE, 
+                  ymax = rate + SE,
+                  color = Location), data = predictions, inherit.aes = FALSE, width = 0.25, linewidth = 2) +
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+  scale_y_continuous(limits=c(0, 100), breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+  theme_classic() +
+  ylab("Percent Tree Cover \n[100m radius]") + 
+  theme(text = element_text(size = 18)) + 
+  theme(axis.text.x=element_text(colour="black", size=18)) + 
+  theme(axis.text.y=element_text(colour="black", size=18),
+        axis.title.x = element_blank()) +
+  theme(legend.position = "none") +
+  annotate(geom="text", x=1.5, y=100, label="***", color="black", size = 10)
+```
