@@ -1200,7 +1200,7 @@ summary(glm(WalkDist ~ log_TotalSub + log_tdr + log_tdh, data = sites, family = 
 
 global <- glm(WalkDist ~ log_TotalSub + log_tdr + log_tdh, data = sites, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_sd_o <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_sd_o)
@@ -1225,7 +1225,7 @@ car::vif(get.models(model_dredge, 1)[[1]]) #looking for less than 2
 # urban forest
 global <- glm(WalkDist ~ tree100m + log_TotalSub + log_tdh + log_patch + log_tdr, data = sites_forest, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_sd_f <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_sd_f)
@@ -1251,7 +1251,7 @@ car::vif(get.models(model_dredge, 1)[[1]]) #looking for less than 2
 # urban center
 global <- glm(WalkDist ~ log_TotalSub + log_tdr + log_tdh + spec_rad + log_patch + road_length_m, data = sites_center, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_sd_c <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_sd_c)
@@ -2056,7 +2056,7 @@ summary(glm(NumWebs ~ log_TotalSub + log_tdr + log_tdh, data = sites, family = p
 
 global <- glm(NumWebs ~ log_TotalSub + log_tdr + log_tdh, data = sites, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_nw_o <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_nw_o)
@@ -2081,7 +2081,7 @@ car::vif(get.models(model_dredge, 1)[[1]]) #looking for less than 2
 # urban forest
 global <- glm(NumWebs ~ tree100m + log_TotalSub + log_tdh + log_patch + log_tdr, data = sites_forest, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_nw_f <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_nw_f)
@@ -2095,7 +2095,7 @@ model.sel(model_dredge) #estimates same signs
 # urban center
 global <- glm(NumWebs ~ log_TotalSub + log_tdr + log_tdh + spec_rad + log_patch + road_length_m, data = sites_center, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_nw_c <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_nw_c)
@@ -2719,7 +2719,7 @@ summary(glm(NumSpiders ~ log_TotalSub + log_tdr + log_tdh, data = sites, family 
 
 global <- glm(NumSpiders ~ log_TotalSub + log_tdr + log_tdh, data = sites, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_ns_o <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_ns_o)
@@ -2741,7 +2741,7 @@ car::vif(get.models(model_dredge, 1)[[1]]) #looking for less than 2
 # urban forest
 global <- glm(NumSpiders ~ tree100m + log_TotalSub + log_tdh + log_patch + log_tdr, data = sites_forest, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_ns_f <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_ns_f)
@@ -2755,7 +2755,7 @@ model.sel(model_dredge) #estimates same signs
 # urban center
 global <- glm(NumSpiders ~ log_TotalSub + log_tdr + log_tdh + spec_rad + log_patch + road_length_m, data = sites_center, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_ns_c <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_ns_c)
@@ -3346,7 +3346,7 @@ pander(aictab(fits, modname = modnames), caption="Table 1. AICc model selection 
 
 global <- glm(round(RetreatDist, 0) ~ log_TotalSub + log_tdr + log_tdh, data = near, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_wd_o <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_wd_o)
@@ -3367,7 +3367,7 @@ car::vif(get.models(model_dredge, 5)[[1]]) # looking for less than 2
 # Urban Forest
 global <- glm(round(RetreatDist, 0) ~ tree100m + log_TotalSub + log_tdr + log_tdh + log_patch, data = near, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_wd_f <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_wd_f)
@@ -3394,7 +3394,7 @@ car::vif(get.models(model_dredge, 1)[[1]]) # all but log_tdh over 2
 # This means there is quite a bit of multicollinearity. Let's try removing the variable with the highest vif.
 global2 <- update(global, .~. -tree100m)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global2, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global2, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_wd_f <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_wd_f)
@@ -3431,7 +3431,7 @@ car::vif(get.models(model_dredge, 1)[[1]]) # looking for less than 2
 # Urban Center
 global <- glm(round(RetreatDist, 0) ~ log_TotalSub + log_tdr + log_tdh + spec_rad + log_patch + road_length_m, data = near, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_wd_c <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_wd_c)
@@ -3465,7 +3465,7 @@ car::vif(get.models(model_dredge, 1)[[1]]) #all except tdh above 2
 
 global2 <- update(global, .~. -spec_rad)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global2, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global2, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_wd_c <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_wd_c)
@@ -3477,7 +3477,7 @@ car::vif(get.models(model_dredge, 1)[[1]])
 
 global3 <- update(global2, .~. -road_length_m)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global3, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global3, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_wd_c <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_wd_c)
@@ -4055,8 +4055,8 @@ myFunc <- function(mm) {
     predict(mm, newdata = predictions, re.form = ~0, type = "response")
 }
 #bigBoot_height_location <- bootMer(height, myFunc, nsim = 1000)
-#saveRDS(bigBoot_height_location, file = "bootstrapping/bigBoot_height_location")
-bigBoot_height_location <- readRDS("bootstrapping/bigBoot_height_location")
+#saveRDS(bigBoot_height_location, file = "bootstrapping/bigBoot_height_location.Rds")
+bigBoot_height_location <- readRDS("bootstrapping/bigBoot_height_location.Rds")
 predSE <- t(apply(bigBoot_height_location$t, MARGIN = 2, FUN = sd))
 predictions$SE <- predSE[1, ]
 #predictions2 <- summary(emmeans(height, ~Location | Neighbor,type = "response"))
@@ -4088,8 +4088,8 @@ myFunc <- function(mm) {
     predict(mm, newdata = predictions, re.form = ~0, type = "response")
 }
 #bigBoot_height_location2 <- bootMer(height2, myFunc, nsim = 1000)
-#saveRDS(bigBoot_height_location2, file = "bootstrapping/bigBoot_height_location2")
-bigBoot_height_location2 <- readRDS("bootstrapping/bigBoot_height_location2")
+#saveRDS(bigBoot_height_location2, file = "bootstrapping/bigBoot_height_location2.Rds")
+bigBoot_height_location2 <- readRDS("bootstrapping/bigBoot_height_location2.Rds")
 predSE <- t(apply(bigBoot_height_location2$t, MARGIN = 2, FUN = sd))
 predictions$SE <- predSE[1, ]
 #predictions2 <- summary(emmeans(height2, ~Location | Neighbor,type = "response"))
@@ -4134,9 +4134,9 @@ fits = lapply(models, glm, data = webs, family = "poisson")
 modnames = sapply(models, function(ff)deparse(ff[[3]]))
 pander(aictab(fits, modname = modnames), caption="Table 1. AICc model selection table for Search Distance to the Focal Web.", split.tables = Inf)
 
-global <- glmer(ceiling(RetreatHeight) ~ log_TotalSub + log_tdr + log_tdh + (1 | ID), data = webs, family = poisson)
+global <- glmer(round(RetreatHeight, 0) ~ log_TotalSub + log_tdr + log_tdh + (1 | ID), data = webs, family = poisson)
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = TRUE, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_wh_o <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_wh_o)
@@ -4166,19 +4166,18 @@ exp(info[4, 2])
 car::vif(get.models(model_dredge, 5)[[1]]) # looking for less than 2
 
 # Urban Forest
-global <- glmer(ceiling(RetreatHeight) ~ tree100m + log_TotalSub + log_tdr + log_tdh + log_patch + (1 | ID), data = webs, family = poisson)
+webs_forest <- webs_forest %>% 
+  mutate(tree100m_frac = I(tree100m/100))
+global <- glmer(round(RetreatHeight, 0) ~ tree100m_frac + log_TotalSub + log_tdr + log_tdh + log_patch + (1 | ID), data = webs_forest, family = poisson, control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e4)))
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = TRUE, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_wh_f <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_wh_f)
 out
 info <- out[[10]]
 
-#TotalSub
--exp(info[3, 1])
-exp(info[3, 2])
-#Road
+#tree
 exp(info[2, 1])
 exp(info[2, 2])
 
@@ -4187,36 +4186,28 @@ model.sel(model_dredge) #estimates same signs
 out <- summary(model.avg(model_dredge, subset = delta <= 2))
 out
 info <- out[[10]]
-#tdr
+#tree
 exp(info[2, 1])
 exp(info[2, 2])
 #TotalSub
 exp(info[3, 1])
 exp(info[3, 2])
-#tdh
+#tdr
 exp(info[4, 1])
 exp(info[4, 2])
-#tree
-(info[5, 1])
-(info[5, 2])
-#patch
-exp(info[6, 1])
-exp(info[6, 2])
-car::vif(get.models(model_dredge, 1)[[1]]) # looking for less than 2
+
+#car::vif(get.models(model_dredge, 1)[[1]]) # looking for less than 2
 
 # Urban Center
-global <- glmer(ceiling(RetreatHeight) ~ log_TotalSub + log_tdr + log_tdh + spec_rad + log_patch + road_length_m + (1 | ID), data = webs, family = poisson)
+global <- glmer(round(RetreatHeight, 0) ~ log_TotalSub + log_tdr + log_tdh + scale(spec_rad, center = FALSE) + log_patch + scale(road_length_m, center = FALSE) + (1 | ID), data = webs_center, family = poisson,  control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e4)))
 options(na.action = "na.fail") # Required for dredge to run
-model_dredge <- dredge(global, beta = F, evaluate = T, rank = AICc)
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
 options(na.action = "na.omit") # set back to default
 top_model_wh_c <- get.models(model_dredge, subset = 1)[[1]]
 out <- summary(top_model_wh_c)
 out
 info <- out[[10]]
 #TotalSub
-exp(info[3, 1])
-exp(info[3, 2])
-#tdr
 exp(info[2, 1])
 exp(info[2, 2])
 
@@ -4225,79 +4216,311 @@ model.sel(model_dredge) #estimates same signs
 out <- summary(model.avg(model_dredge, subset = delta <= 2))
 out
 info <- out[[10]]
-#tdr
+#TotalSub
 exp(info[2, 1])
 exp(info[2, 2])
-#TotalSub
+#road length
 exp(info[3, 1])
 exp(info[3, 2])
 #tdh
 exp(info[4, 1])
 exp(info[4, 2])
-#patch
+#tdr
 exp(info[5, 1])
 exp(info[5, 2])
-#road length
+#patch
 exp(info[6, 1])
 exp(info[6, 2])
 #spec_rad
 exp(info[7, 1])
 exp(info[7, 2])
-car::vif(get.models(model_dredge, 1)[[1]]) # looking for less than 2
+#car::vif(get.models(model_dredge, 1)[[1]]) # looking for less than 2
 ```
 
 *Overall* 
 Fixed effects:
              Estimate Std. Error z value Pr(>|z|)    
-(Intercept)    3.1824     0.6117   5.202 1.97e-07 ***
-log_tdr       -0.1846     0.1007  -1.834  0.06665 .  
-log_TotalSub   0.4715     0.1633   2.888  0.00388 ** 
+(Intercept)    3.1686     0.6215   5.098 3.43e-07 ***
+log_tdr       -0.1896     0.1023  -1.854  0.06378 .   *negative*
+log_TotalSub   0.4812     0.1659   2.901  0.00372 **  *positive*
 
-R-squared = 0.3635599 (marginal - fixed) 0.9508324 (conditional - fixed and random)
+R-squared = 0.3671774 (marginal - fixed) 0.9521663 (conditional - fixed and random)
 
 (conditional average) 
              Estimate Std. Error Adjusted SE z value Pr(>|z|)   
-(Intercept)    3.3645     1.2653      1.2710   2.647  0.00812 **
-log_tdr       -0.1934     0.1006      0.1016   1.903  0.05703 . 
-log_TotalSub   0.4611     0.1784      0.1799   2.563  0.01038 * 
-log_tdh       -0.3226     0.2678      0.2704   1.193  0.23276 
+(Intercept)    3.3701     1.2954      1.3012   2.590  0.00959 **
+log_tdr       -0.1986     0.1022      0.1032   1.924  0.05432 .  
+log_TotalSub   0.4697     0.1814      0.1830   2.567  0.01026 * 
+log_tdh       -0.3307     0.2719      0.2745   1.205  0.22832    
 
 *Urban Forest*
 Fixed effects:
-             Estimate Std. Error z value Pr(>|z|)    
-(Intercept)    3.1824     0.6117   5.202 1.97e-07 ***
-log_tdr       -0.1846     0.1007  -1.834  0.06665 .  
-log_TotalSub   0.4715     0.1633   2.888  0.00388 ** 
+              Estimate Std. Error z value Pr(>|z|)   
+(Intercept)     1.1283     0.8355   1.350  0.17687   
+tree100m_frac   5.0864     1.7266   2.946  0.00322 ** *positive*
 
-R-squared = 0.3635599 (marginal - fixed) 0.9508324 (conditional - fixed and random)
+R-squared = 0.4787743 (marginal - fixed) 0.9596909 (conditional - fixed and random)
 
 (conditional average) 
-              Estimate Std. Error Adjusted SE z value Pr(>|z|)  
-(Intercept)   3.479599   1.469543    1.475122   2.359   0.0183 *
-log_tdr      -0.213553   0.111308    0.112287   1.902   0.0572 .
-log_TotalSub  0.471545   0.218490    0.220246   2.141   0.0323 *
-log_tdh      -0.359085   0.274215    0.276807   1.297   0.1945  
-tree100m      0.015565   0.008560    0.008623   1.805   0.0711 .
-log_patch    -0.087858   0.099543    0.100463   0.875   0.3818
+              Estimate Std. Error Adjusted SE z value Pr(>|z|)   
+(Intercept)     0.3764     1.3417      1.3881   0.271   0.7863   
+tree100m_frac   5.0033     1.7056      1.7823   2.807   0.0050 **
+log_TotalSub    0.6815     0.3801      0.3976   1.714   0.0865 . 
+log_tdr        -0.2415     0.1683      0.1769   1.365   0.1721   
 
 *Urban Center*
 Fixed effects:
              Estimate Std. Error z value Pr(>|z|)    
-(Intercept)    3.1824     0.6117   5.202 1.97e-07 ***
-log_tdr       -0.1846     0.1007  -1.834  0.06665 .  
-log_TotalSub   0.4715     0.1633   2.888  0.00388 **
+(Intercept)    2.0705     0.4687   4.417    1e-05 ***
+log_TotalSub   0.6449     0.3921   1.645      0.1     *positive*
 
-R-squared = 0.3635599 (marginal - fixed) 0.9508324 (conditional - fixed and random)
+R-squared = 0.1332201 (marginal - fixed) 0.9103755 (conditional - fixed and random)
 
 (conditional average) 
-               Estimate Std. Error Adjusted SE z value Pr(>|z|)  
-(Intercept)    3.458641   2.160676    2.174189   1.591   0.1117  
-log_tdr       -0.212514   0.112355    0.113366   1.875   0.0609 .
-log_TotalSub   0.504709   0.216517    0.218399   2.311   0.0208 *
-log_tdh       -0.359085   0.274215    0.276807   1.297   0.1945  
-log_patch     -0.087858   0.099543    0.100463   0.875   0.3818  
-road_length_m  0.002237   0.004915    0.004962   0.451   0.6521  
-spec_rad       0.012420   0.030255    0.030548   0.407   0.6843 
+                                     Estimate Std. Error Adjusted SE z value Pr(>|z|)
+(Intercept)                            2.6980     2.7479      2.7626   0.977   0.3288
+log_TotalSub                           0.7725     0.4093      0.4138   1.867   0.0619
+scale(road_length_m, center = FALSE)   1.0413     0.7533      0.7625   1.366   0.1720
+log_tdh                               -0.3763     0.3175      0.3212   1.172   0.2413
+log_tdr                               -0.2307     0.1466      0.1483   1.555   0.1199
+log_patch                              0.2033     0.1934      0.1959   1.038   0.2994
+scale(spec_rad, center = FALSE)       -5.6099     6.2722      6.3531   0.883   0.3772 
+
+```{r height_predictor_overall_graphs}
+colorc = "#d95f02" 
+colorf = "#1b9e77"
+coloro = "black"
+
+# Plant Species Richness
+predictions <- expand.grid(log_TotalSub = seq(0, 3.15, 0.03),
+                           log_tdr = mean(webs$log_tdr))
+predictions$response <- predict(top_model_wh_o, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+myFunc <- function(mm) {
+    predict(mm, newdata = predictions, re.form = ~0, type = "response")
+}
+#bigBoot_height_overall_plant <- bootMer(top_model_wh_o, myFunc, nsim = 1000)
+#saveRDS(bigBoot_height_overall_plant, file = "bootstrapping/bigBoot_height_overall_plant.Rds")
+bigBoot_height_overall_plant <- readRDS("bootstrapping/bigBoot_height_overall_plant.Rds")
+predSE <- t(apply(bigBoot_height_overall_plant$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+
+height_plant <- ggplot(webs, aes(x = log_TotalSub, y = log(RetreatHeight))) + 
+  geom_point(color = "grey", 
+             size = 1) +
+  geom_line(aes(x = log_TotalSub, y = log(response)), 
+            size = 1, 
+            color = coloro, 
+            data = predictions) + 
+  geom_ribbon(aes(x = log_TotalSub, 
+                  ymin = log(response - 1.96 * SE), 
+                  ymax = log(response + 1.96 * SE)), 
+              fill = coloro, 
+              data = predictions, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(min(log(webs$RetreatHeight)), max(log(webs$RetreatHeight)) + 0.1 * diff(range(log(webs$RetreatHeight))))) +  
+  theme_classic() +
+  xlab("Plant Species Richness [log()]") +
+  ylab("Web Height [log(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.text.x = element_blank(), 
+        axis.title.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) +
+  annotate(geom = "text", x = min(predictions$log_TotalSub) + diff(range(predictions$log_TotalSub))/2, y = max(log(webs$RetreatHeight)), label = "**", color = "black", size = 4)
+
+# Road Disturbance
+predictions <- expand.grid(log_TotalSub = mean(webs$log_TotalSub),
+                           log_tdr = seq(2.73, 7.22, 0.05))
+predictions$response <- predict(top_model_wh_o, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+myFunc <- function(mm) {
+    predict(mm, newdata = predictions, re.form = ~0, type = "response")
+}
+#bigBoot_height_overall_tdr <- bootMer(top_model_wh_o, myFunc, nsim = 1000)
+#saveRDS(bigBoot_height_overall_tdr, file = "bootstrapping/bigBoot_height_overall_tdr.Rds")
+bigBoot_height_overall_tdr <- readRDS("bootstrapping/bigBoot_height_overall_tdr.Rds")
+predSE <- t(apply(bigBoot_height_overall_tdr$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+
+height_tdr <- ggplot(webs, aes(x = log_tdr, y = log(RetreatHeight))) + 
+  geom_point(color = "grey", 
+             size = 1) +
+  geom_line(aes(x = log_tdr, y = log(response)), 
+            size = 1, 
+            color = coloro, 
+            data = predictions) + 
+  geom_ribbon(aes(x = log_tdr, 
+                  ymin = log(response - 1.96 * SE), 
+                  ymax = log(response + 1.96 * SE)), 
+              fill = coloro, 
+              data = predictions, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(min(log(webs$RetreatHeight)), max(log(webs$RetreatHeight)) + 0.1 * diff(range(log(webs$RetreatHeight))))) +  
+  theme_classic() +
+  xlab("Road Disturbance [log(vehicles/day/m)]") +
+  ylab("Web Height [log(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.text.x = element_blank(), 
+        axis.title.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) +
+  annotate(geom = "text", x = min(predictions$log_tdr) + diff(range(predictions$log_tdr))/2, y = max(log(webs$RetreatHeight)), label = ".", color = "black", size = 4)
+
+height_plant
+height_tdr
+```
+
+```{r height_predictor_forest_graphs}
+colorc = "#d95f02" 
+colorf = "#1b9e77"
+coloro = "black"
+
+# Tree
+predictions <- expand.grid(tree100m_frac = seq(0.31, 0.66, 0.003))
+predictions$response <- predict(top_model_wh_f, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+myFunc <- function(mm) {
+    predict(mm, newdata = predictions, re.form = ~0, type = "response")
+}
+#bigBoot_height_forest_tree <- bootMer(top_model_wh_f, myFunc, nsim = 1000)
+#saveRDS(bigBoot_height_forest_tree, file = "bootstrapping/bigBoot_height_forest_tree.Rds")
+bigBoot_height_forest_tree <- readRDS("bootstrapping/bigBoot_height_forest_tree.Rds")
+predSE <- t(apply(bigBoot_height_forest_tree$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+
+height_forest_tree <- ggplot(webs_forest, aes(x = log(tree100m_frac), y = log(RetreatHeight))) + 
+  geom_point(color = "grey", 
+             size = 1) +
+  geom_line(aes(x = log(tree100m_frac), y = log(response)), 
+            size = 1, 
+            color = colorf, 
+            data = predictions) + 
+  geom_ribbon(aes(x = log(tree100m_frac), 
+                  ymin = log(response - 1.96 * SE), 
+                  ymax = log(response + 1.96 * SE)), 
+              fill = colorf, 
+              data = predictions, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(min(log(webs_forest$RetreatHeight)), max(log(webs_forest$RetreatHeight)) + 0.1 * diff(range(log(webs_forest$RetreatHeight))))) +  
+  theme_classic() +
+  xlab("Proportion of Tree Cover in 100-Meter Buffer of Site [log()]") +
+  ylab("Web Height [log(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.text.x = element_blank(), 
+        axis.title.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) +
+  annotate(geom = "text", x = min(log(predictions$tree100m_frac)) + diff(range(log(predictions$tree100m_frac)))/2, y = max(log(webs_forest$RetreatHeight)), label = "**", color = "black", size = 4)
+
+height_forest_tree
+```
+
+```{r height_predictor_center_graphs}
+colorc = "#d95f02" 
+colorf = "#1b9e77"
+coloro = "black"
+
+# Plant Species Richness
+predictions <- expand.grid(log_TotalSub = seq(0, 1.80, 0.02))
+predictions$response <- predict(top_model_wh_c, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+myFunc <- function(mm) {
+    predict(mm, newdata = predictions, re.form = ~0, type = "response")
+}
+#bigBoot_height_center_plant <- bootMer(top_model_wh_c, myFunc, nsim = 1000)
+#saveRDS(bigBoot_height_center_plant, file = "bootstrapping/bigBoot_height_center_plant.Rds")
+bigBoot_height_center_plant <- readRDS("bootstrapping/bigBoot_height_center_plant.Rds")
+predSE <- t(apply(bigBoot_height_center_plant$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+
+height_center_plant <- ggplot(webs_center, aes(x = log_TotalSub, y = log(RetreatHeight))) + 
+  geom_point(color = "grey", 
+             size = 1) +
+  geom_line(aes(x = log_TotalSub, y = log(response)), 
+            size = 1, 
+            color = colorc, 
+            data = predictions) + 
+  geom_ribbon(aes(x = log_TotalSub, 
+                  ymin = log(response - 1.96 * SE), 
+                  ymax = log(response + 1.96 * SE)), 
+              fill = colorc, 
+              data = predictions, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(min(log(webs_forest$RetreatHeight)) - 4, max(log(webs_forest$RetreatHeight)) + 0.1 * diff(range(log(webs_forest$RetreatHeight))))) +  
+  theme_classic() +
+  xlab("Plant Species Richness [log()]") +
+  ylab("Web Height [log(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.text.x = element_blank(), 
+        axis.title.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank()) +
+  annotate(geom = "text", x = min((predictions$log_TotalSub)) + diff(range((predictions$log_TotalSub)))/2, y = max(log(webs_forest$RetreatHeight)), label = "N.S.", color = "black", size = 4)
+
+height_center_plant
+```
 
 ### Web Height by Land
 
+```{r height_land_stats}
+height_land <- glmer(round(RetreatHeight, 0) ~ Land + (1 | ID), data = webs, family = poisson)
+summary(height_land)
+car::Anova(height_land, type = 3)
+comp <- glht(height_land, linfct = mcp(Land = "Tukey"))
+summary(comp)
+```
+
+```{r height_land_graph}
+webs <- webs %>% 
+  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
+                            "Woody Wetlands", 
+                            "Urban, High", 
+                            "Urban, Medium", 
+                            "Urban, Low"))
+predictions <- expand.grid(Land = levels(factor(webs$Land)))
+predictions$response <- predict(height_land, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+myFunc <- function(mm) {
+    predict(mm, newdata = predictions, re.form = ~0, type = "response")
+}
+#bigBoot_height_land <- bootMer(height_land, myFunc, nsim = 1000)
+#saveRDS(bigBoot_height_land, file = "bootstrapping/bigBoot_height_land.Rds")
+bigBoot_height_land <- readRDS("bootstrapping/bigBoot_height_land.Rds")
+predSE <- t(apply(bigBoot_height_land$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+#predictions2 <- summary(emmeans(height_land, ~Land,type = "response"))
+
+ggplot(webs, aes(x = Land, y = RetreatHeight)) + 
+  geom_jitter(color = "grey", width = 0.1, size = 0.5) +
+  geom_point(aes(x = Land, y = response, color = Land), size = 1, data = predictions) + 
+  geom_errorbar(aes(x = Land, 
+                  ymin = response - SE, 
+                  ymax = response + SE, color = Land), data = predictions, inherit.aes = FALSE, width = 0.25, size = 1) +
+  theme_classic() +
+  scale_color_manual(values = c("Deciduous Forest" = "#1b9e77", "Woody Wetlands" = "#1b9e77", "Urban, High" = "#d95f02", "Urban, Medium" = "#d95f02", "Urban, Low" = "#d95f02")) +
+  xlab("Land Cover Class") +
+  ylab("Web Height [log(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x=element_text(colour="black", size=10)) + 
+  theme(axis.text.y=element_text(colour="black", size=10)) +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
+  annotate(geom="text", x=1, y=max(webs$RetreatHeight), label="A", color="black", size = 3) +
+  annotate(geom="text", x=2, y=max(webs$RetreatHeight), label="A", color="black", size = 3) +
+  annotate(geom="text", x=3, y=max(webs$RetreatHeight), label="A", color="black", size = 3) +
+  annotate(geom="text", x=4, y=max(webs$RetreatHeight), label="A", color="black", size = 3) +
+  annotate(geom="text", x=5, y=max(webs$RetreatHeight), label="A", color="black", size = 3)
+```
