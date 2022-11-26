@@ -32,6 +32,7 @@ library(MuMIn) # to run the dredge function
 library(lme4) # to run the glmer function for the web distance (random effects)
 library(broom.mixed) # for augment of the mixed effect models (web distance) to look at assumptions
 library(multcomp) # for pairwise comparisons of land cover categories
+library(flextable) # making tables
 ```
 
 ## Import Data
@@ -41,6 +42,11 @@ The document "webs" is a text file in the data folder of the repository/director
 ```{r import, include = FALSE}
 webs <- read.table(file = "data/webs.txt", header = TRUE) 
 # includes data for every measured web (multiple per site)
+land_cover <- read.table(file = "data/land_cover_table.txt", header = TRUE) # for land cover table
+pred_table <- read.table(file = "data/pred_table.txt", header = TRUE) # for predictor stats table
+substrates <- read.table(file = "data/substrate.txt", header = TRUE) # for substrate figure
+site_info <- read.table(file = "data/site_info.txt", header = TRUE) # for site information table
+pred_table_avg <- read.table(file = "data/pred_table_avg.txt", header = TRUE) # for predictor stats table
 ```
 
 ## Data Wrangling
@@ -215,6 +221,8 @@ web_dist <- webs %>%
 
 near <- web_dist %>% 
   filter(Neighbor == 1)
+
+webs$RetreatHeight[webs$RetreatHeight == 0] <- 0.1
 ```
 
 We conclude to use log-transformations for TotalSub, Traffic_Dist_Road, Traffic_Dist_Highway, and patch_area_km.
@@ -1135,7 +1143,7 @@ raw <- sites %>%
             se = plotrix::std.error(WalkDist))
 
 
-raw_plot <- ggplot(sites, aes(x = Location, y = WalkDist)) + 
+raw_plot_search <- ggplot(sites, aes(x = Location, y = WalkDist)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = mean, color = Location), size = 2, data = raw) +
   geom_errorbar(aes(x= Location, 
@@ -1146,13 +1154,13 @@ raw_plot <- ggplot(sites, aes(x = Location, y = WalkDist)) +
     scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
     theme_classic() +
     scale_y_continuous(limits = c(0, 275), breaks = c(0, 50, 100, 150, 200, 250)) +
+    xlab("Collection Location") +
     ylab("Search Distance [m]") + 
-    theme(text = element_text(size = 16)) + 
-    theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-    theme(axis.text.y = element_text(colour = "black", size = 16),
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
-    theme(legend.position = "none") +
-    ggtitle("Raw Data")
+    theme(legend.position = "none")
 
 # Non-transformed, poisson distribution
 nd <- data.frame(Location = factor(levels(sites$Location)))
@@ -1161,7 +1169,7 @@ predictions <- predictions %>%
   rename("rate" = ".fitted", "SE" = ".se.fit")
 #predictions2 <- summary(emmeans(search, ~Location),type = "response")
 
-poisson_plot <- ggplot(sites, aes(x = Location, y = WalkDist)) + 
+poisson_plot_search <- ggplot(sites, aes(x = Location, y = WalkDist)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = rate, color = Location), size = 2, data = predictions) + 
   geom_errorbar(aes(x = Location, 
@@ -1172,14 +1180,14 @@ poisson_plot <- ggplot(sites, aes(x = Location, y = WalkDist)) +
   scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
   theme_classic() +
   scale_y_continuous(limits = c(0, 275), breaks = c(0, 50, 100, 150, 200, 250)) +
+  xlab("Collection Location") +
   ylab("Search Distance [m]") + 
-  theme(text = element_text(size = 16)) + 
-  theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-  theme(axis.text.y = element_text(colour = "black", size = 16),
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
   theme(legend.position = "none") +
-  annotate(geom = "text", x = 1.5, y = 275, label = "***", color = "black", size = 10) +
-  ggtitle("Poisson Distribution")
+  annotate(geom = "text", x = 1.5, y = 275, label = "***", color = "black", size = 5)
 
 # Let's look at the log-transformed response variable since that is normal
 nd <- data.frame(Location = factor(levels(sites$Location)))
@@ -1188,7 +1196,7 @@ predictions2 <- predictions2 %>%
   rename("response" = ".fitted", "SE" = ".se.fit")
 #predictions2 <- summary(emmeans(search2, ~Location),type = "response")
 
-log_plot <- ggplot(sites, aes(x = Location, y = (WalkDist))) + 
+log_plot_search <- ggplot(sites, aes(x = Location, y = (WalkDist))) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = exp(response), color = Location), size = 2, data = predictions2) + 
   geom_errorbar(aes(x = Location, 
@@ -1199,16 +1207,20 @@ log_plot <- ggplot(sites, aes(x = Location, y = (WalkDist))) +
   scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
   theme_classic() +
   scale_y_continuous(limits = c(0, 275), breaks = c(0, 50, 100, 150, 200, 250)) +
+  xlab("Collection Location") +
   ylab("Search Distance [m]") + 
-  theme(text = element_text(size = 16)) + 
-  theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-  theme(axis.text.y = element_text(colour = "black", size = 16),
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
   theme(legend.position = "none") +
-  annotate(geom = "text", x = 1.5, y = 275, label = "", color = "black", size = 10) +
-  ggtitle("Log-Transformed")
+  annotate(geom = "text", x = 1.5, y = 275, label = "", color = "black", size = 5)
 
-ggarrange(raw_plot, poisson_plot, log_plot, nrow = 1)
+ggarrange(raw_plot_search, 
+          poisson_plot_search, 
+          log_plot_search, 
+          labels = c("Raw Data", "Poisson Distribution", "Log-Transformed"),
+          nrow = 1)
 ```
 
 Using a Poisson distribution, we **searched significantly further at sites in the urban forest** than the urban center to reach the focal web (z = -10.1, df = 1, 20, p < 0.001).
@@ -1823,7 +1835,7 @@ predictions <- predictions %>%
   rename("rate" = ".fitted", "SE" = ".se.fit")
 #predictions <- summary(emmeans(search_land, ~Land),type = "response")
 
-ggplot(sites, aes(x = Land, y = WalkDist)) + 
+search_land_plot <- ggplot(sites, aes(x = Land, y = WalkDist)) + 
   geom_jitter(color = "grey", width = 0.1, size = 0.5) +
   geom_point(aes(x = Land, y = rate, color = Land), size = 1, data = predictions) + 
   geom_errorbar(aes(x = Land, 
@@ -1843,6 +1855,8 @@ ggplot(sites, aes(x = Land, y = WalkDist)) +
   annotate(geom="text", x=3, y=max(sites$WalkDist), label="C", color="black", size = 3) +
   annotate(geom="text", x=4, y=max(sites$WalkDist), label="A", color="black", size = 3) +
   annotate(geom="text", x=5, y=max(sites$WalkDist), label="A", color="black", size = 3)
+
+search_land_plot
 ```
 
 **Search distance significantly varies** by land class (Chi = 340.32, df = 4, p < 0.001).
@@ -1995,7 +2009,7 @@ raw <- sites %>%
             se = plotrix::std.error(NumWebs))
 
 
-raw_plot <- ggplot(sites, aes(x = Location, y = NumWebs)) + 
+raw_plot_webs <- ggplot(sites, aes(x = Location, y = NumWebs)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = mean, color = Location), size = 2, data = raw) +
   geom_errorbar(aes(x= Location, 
@@ -2007,12 +2021,11 @@ raw_plot <- ggplot(sites, aes(x = Location, y = NumWebs)) +
     theme_classic() +
     scale_y_continuous(limits = c(0, 75), breaks = c(0, 15, 30, 45, 60, 75)) +
     ylab("Number of Webs") + 
-    theme(text = element_text(size = 16)) + 
-    theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-    theme(axis.text.y = element_text(colour = "black", size = 16),
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
-    theme(legend.position = "none") +
-    ggtitle("Raw Data")
+    theme(legend.position = "none")
 
 # Non-transformed, poisson distribution
 nd <- data.frame(Location = factor(levels(sites$Location)))
@@ -2021,7 +2034,7 @@ predictions <- predictions %>%
   rename("rate" = ".fitted", "SE" = ".se.fit")
 #predictions <- summary(emmeans(web, ~Location),type = "response")
 
-poisson_plot <- ggplot(sites, aes(x = Location, y = NumWebs)) + 
+poisson_plot_webs <- ggplot(sites, aes(x = Location, y = NumWebs)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = rate, color = Location), size = 2, data = predictions) + 
   geom_errorbar(aes(x = Location, 
@@ -2033,13 +2046,12 @@ poisson_plot <- ggplot(sites, aes(x = Location, y = NumWebs)) +
   theme_classic() +
     scale_y_continuous(limits = c(0, 75), breaks = c(0, 15, 30, 45, 60, 75)) +
   ylab("Number of Webs") + 
-  theme(text = element_text(size = 16)) + 
-  theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-  theme(axis.text.y = element_text(colour = "black", size = 16),
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
   theme(legend.position = "none") +
-  annotate(geom = "text", x = 1.5, y = 75, label = "***", color = "black", size = 10) +
-  ggtitle("Poisson Distribution")
+  annotate(geom = "text", x = 1.5, y = 75, label = "***", color = "black", size = 5) 
 
 # Let's look at the log-transformed response variable since that is normal
 nd <- data.frame(Location = factor(levels(sites$Location)))
@@ -2048,7 +2060,7 @@ predictions <- predictions %>%
   rename("response" = ".fitted", "SE" = ".se.fit")
 #predictions2 <- summary(emmeans(webs2, ~Location),type = "response")
 
-log_plot <- ggplot(sites, aes(x = Location, y = (NumWebs))) + 
+log_plot_webs <- ggplot(sites, aes(x = Location, y = (NumWebs))) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = exp(response), color = Location), size = 2, data = predictions) + 
   geom_errorbar(aes(x = Location, 
@@ -2060,15 +2072,18 @@ log_plot <- ggplot(sites, aes(x = Location, y = (NumWebs))) +
   theme_classic() +
     scale_y_continuous(limits = c(0, 75), breaks = c(0, 15, 30, 45, 60, 75)) +
   ylab("Number of Webs") + 
-  theme(text = element_text(size = 16)) + 
-  theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-  theme(axis.text.y = element_text(colour = "black", size = 16),
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
   theme(legend.position = "none") +
-  annotate(geom = "text", x = 1.5, y = 75, label = "**", color = "black", size = 10) +
-  ggtitle("Log-Transformed")
+  annotate(geom = "text", x = 1.5, y = 75, label = "**", color = "black", size = 5)
 
-ggarrange(raw_plot, poisson_plot, log_plot, nrow = 1)
+ggarrange(raw_plot_webs, 
+          poisson_plot_webs, 
+          log_plot_webs, 
+          labels = c("Raw Data", "Poisson Distribution", "Log-Transformed"),
+          nrow = 1)
 ```
 
 There were **significantly more webs at sites in the urban center** than the urban forest (z = 8.556, df = 1, 20, p < 0.001).
@@ -2492,7 +2507,7 @@ predictions <- predictions %>%
   rename("rate" = ".fitted", "SE" = ".se.fit")
 #predictions <- summary(emmeans(webs_land, ~Land),type = "response")
 
-ggplot(sites, aes(x = Land, y = NumWebs)) + 
+webs_land_plot <- ggplot(sites, aes(x = Land, y = NumWebs)) + 
   geom_jitter(color = "grey", width = 0.1, size = 0.5) +
   geom_point(aes(x = Land, y = rate, color = Land), size = 1, data = predictions) + 
   geom_errorbar(aes(x = Land, 
@@ -2512,6 +2527,12 @@ ggplot(sites, aes(x = Land, y = NumWebs)) +
   annotate(geom="text", x=3, y=max(sites$NumWebs), label="B", color="black", size = 3) +
   annotate(geom="text", x=4, y=max(sites$NumWebs), label="B", color="black", size = 3) +
   annotate(geom="text", x=5, y=max(sites$NumWebs), label="B", color="black", size = 3)
+
+webs_land_plot_nox <- webs_land_plot + 
+  theme(axis.text.x = element_blank()) + 
+  theme(axis.title.x = element_blank())
+
+webs_land_plot
 ```
 
 The **number of webs significantly varies** by land cover class (chi = 106.67, df = 4, p < 0.001).
@@ -2662,7 +2683,7 @@ raw <- sites %>%
             se = plotrix::std.error(NumSpiders))
 
 
-raw_plot <- ggplot(sites, aes(x = Location, y = NumSpiders)) + 
+raw_plot_spiders <- ggplot(sites, aes(x = Location, y = NumSpiders)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = mean, color = Location), size = 2, data = raw) +
   geom_errorbar(aes(x= Location, 
@@ -2674,12 +2695,11 @@ raw_plot <- ggplot(sites, aes(x = Location, y = NumSpiders)) +
     theme_classic() +
     scale_y_continuous(limits = c(0, 25), breaks = c(0, 5, 10, 15, 20, 25)) +
     ylab("Number of Spiders") + 
-    theme(text = element_text(size = 16)) + 
-    theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-    theme(axis.text.y = element_text(colour = "black", size = 16),
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
-    theme(legend.position = "none") +
-    ggtitle("Raw Data")
+    theme(legend.position = "none") 
 
 # Non-transformed, poisson distribution
 nd <- data.frame(Location = factor(levels(sites$Location)))
@@ -2688,7 +2708,7 @@ predictions <- predictions %>%
   rename("rate" = ".fitted", "SE" = ".se.fit")
 #predictions <- summary(emmeans(spiders, ~Location),type = "response")
 
-poisson_plot <- ggplot(sites, aes(x = Location, y = NumSpiders)) + 
+poisson_plot_spiders <- ggplot(sites, aes(x = Location, y = NumSpiders)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = rate, color = Location), size = 2, data = predictions) + 
   geom_errorbar(aes(x = Location, 
@@ -2700,13 +2720,12 @@ poisson_plot <- ggplot(sites, aes(x = Location, y = NumSpiders)) +
   theme_classic() +
     scale_y_continuous(limits = c(0, 25), breaks = c(0, 5, 10, 15, 20, 25)) +
   ylab("Number of Spiders") + 
-  theme(text = element_text(size = 16)) + 
-  theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-  theme(axis.text.y = element_text(colour = "black", size = 16),
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
   theme(legend.position = "none") +
-  annotate(geom = "text", x = 1.5, y = 25, label = "***", color = "black", size = 10) +
-  ggtitle("Poisson Distribution")
+  annotate(geom = "text", x = 1.5, y = 25, label = "***", color = "black", size = 5)
 
 # Let's look at the log-transformed response variable since that is normal
 nd <- data.frame(Location = factor(levels(sites$Location)))
@@ -2715,7 +2734,7 @@ predictions <- predictions %>%
   rename("response" = ".fitted", "SE" = ".se.fit")
 #predictions2 <- summary(emmeans(webs2, ~Location),type = "response")
 
-log_plot <- ggplot(sites, aes(x = Location, y = (NumSpiders))) + 
+log_plot_spiders <- ggplot(sites, aes(x = Location, y = (NumSpiders))) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = exp(response), color = Location), size = 2, data = predictions) + 
   geom_errorbar(aes(x = Location, 
@@ -2727,15 +2746,18 @@ log_plot <- ggplot(sites, aes(x = Location, y = (NumSpiders))) +
   theme_classic() +
     scale_y_continuous(limits = c(0, 25), breaks = c(0, 5, 10, 15, 20, 25)) +
   ylab("Number of Spiders") + 
-  theme(text = element_text(size = 16)) + 
-  theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-  theme(axis.text.y = element_text(colour = "black", size = 16),
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
   theme(legend.position = "none") +
-  annotate(geom = "text", x = 1.5, y = 25, label = ".", color = "black", size = 10) +
-  ggtitle("Log-Transformed")
+  annotate(geom = "text", x = 1.5, y = 25, label = ".", color = "black", size = 5)
 
-ggarrange(raw_plot, poisson_plot, log_plot, nrow = 1)
+ggarrange(raw_plot_spiders, 
+          poisson_plot_spiders, 
+          log_plot_spiders, 
+          labels = c("Raw Data", "Poisson Distribution", "Log-Transformed"),
+          nrow = 1)
 ```
 
 The **number of spiders present by site is significantly higher in the urban center** (z = 4.863, df = 1, 20, p < 0.001).
@@ -3097,7 +3119,7 @@ predictions <- predictions %>%
   rename("rate" = ".fitted", "SE" = ".se.fit")
 #predictions <- summary(emmeans(spiders_land, ~Land),type = "response")
 
-ggplot(sites, aes(x = Land, y = NumSpiders)) + 
+spiders_land_plot <- ggplot(sites, aes(x = Land, y = NumSpiders)) + 
   geom_jitter(color = "grey", width = 0.1, size = 0.5) +
   geom_point(aes(x = Land, y = rate, color = Land), size = 1, data = predictions) + 
   geom_errorbar(aes(x = Land, 
@@ -3117,6 +3139,12 @@ ggplot(sites, aes(x = Land, y = NumSpiders)) +
   annotate(geom="text", x=3, y=max(sites$NumSpiders), label="B", color="black", size = 3) +
   annotate(geom="text", x=4, y=max(sites$NumSpiders), label="B", color="black", size = 3) +
   annotate(geom="text", x=5, y=max(sites$NumSpiders), label="B", color="black", size = 3)
+
+spiders_land_plot_nox <- spiders_land_plot + 
+  theme(axis.text.x = element_blank()) + 
+  theme(axis.title.x = element_blank())
+
+spiders_land_plot
 ```
 
 The **number of spiders per site significantly varies** across land cover class (Chi = 31.65, df = 4, p < 0.001).
@@ -3269,7 +3297,7 @@ raw <- web_dist %>%
             se = plotrix::std.error(RetreatDist))
 
 
-raw_plot <- ggplot(web_dist, aes(x = Neighbor, y = RetreatDist)) + 
+raw_plot_dist <- ggplot(web_dist, aes(x = Neighbor, y = RetreatDist)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Neighbor, y = mean, color = Location), size = 2, data = raw) +
   geom_line(aes(x = Neighbor, y = mean, group = Location), size = 2, data = raw, color = "grey") +
@@ -3283,10 +3311,10 @@ raw_plot <- ggplot(web_dist, aes(x = Neighbor, y = RetreatDist)) +
     scale_y_continuous(limits = c(0, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
     xlab("Nearest Neighbors") +
     ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
-    theme(text = element_text(size = 16)) + 
-    theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-    theme(axis.text.y = element_text(colour = "black", size = 16)) +
-    ggtitle("Raw Data") 
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10)) +
+    theme(legend.position = "none")
 
 # Non-transformed, poisson distribution
 variable_names <- list("1" = "Nearest Neighbor",
@@ -3307,7 +3335,7 @@ predSE <- t(apply(bigBoot_dist_location$t, MARGIN = 2, FUN = sd))
 predictions$SE <- predSE[1, ]
 #predictions2 <- summary(emmeans(dist, ~Location | Neighbor,type = "response"))
 
-poisson_plot <- ggplot(web_dist, aes(x = Neighbor, y = RetreatDist)) + 
+poisson_plot_dist <- ggplot(web_dist, aes(x = Neighbor, y = RetreatDist)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Neighbor, y = response, color = Location), size = 2, data = predictions) + 
   geom_line(aes(x = Neighbor, y = response, group = Location), size = 2, data = predictions, color = "grey") +
@@ -3321,10 +3349,10 @@ poisson_plot <- ggplot(web_dist, aes(x = Neighbor, y = RetreatDist)) +
   scale_y_continuous(limits = c(0, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
   xlab("Nearest Neighbors") +
   ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
-  theme(text = element_text(size = 16)) + 
-  theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-  theme(axis.text.y = element_text(colour = "black", size = 16)) +
-  ggtitle("Poisson Distribution")
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(legend.position = "none")
 
 # Let's look at the log-transformed response variable since that is normal
 variable_names <- list("1" = "Nearest Neighbor",
@@ -3345,7 +3373,7 @@ predSE <- t(apply(bigBoot_dist_location2$t, MARGIN = 2, FUN = sd))
 predictions$SE <- predSE[1, ]
 #predictions2 <- summary(emmeans(dist2, ~Location | Neighbor,type = "response"))
 
-log_plot <- ggplot(web_dist, aes(x = Neighbor, y = (RetreatDist))) + 
+log_plot_dist <- ggplot(web_dist, aes(x = Neighbor, y = (RetreatDist))) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Neighbor, y = exp(response), color = Location), size = 2, data = predictions) + 
   geom_line(aes(x = Neighbor, y = exp(response), group = Location), size = 2, data = predictions, color = "grey") +
@@ -3359,12 +3387,16 @@ log_plot <- ggplot(web_dist, aes(x = Neighbor, y = (RetreatDist))) +
   scale_y_continuous(limits = c(0, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
   xlab("Nearest Neighbors") +
   ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
-  theme(text = element_text(size = 16)) + 
-  theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-  theme(axis.text.y = element_text(colour = "black", size = 16)) +
-  ggtitle("Log-Transformed")
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10))
 
-ggarrange(raw_plot, poisson_plot, log_plot, nrow = 1, common.legend = TRUE)
+ggarrange(raw_plot_dist, 
+          poisson_plot_dist, 
+          log_plot_dist, 
+          labels = c("Raw Data", "Poisson Distribution", "Log-Transformed"),
+          nrow = 1, 
+          common.legend = TRUE)
 ```
 
 Spider neighbors were **significantly closer in the urban center** than the urban forest (z = -5.597, df = 1, 21, p < 0.001). The **second neighbor was always further from the focal web** than the first (z = 14.654, df = 1, 21, p < 0.001), as this is how we defined the first and second neighbor. We also found a **significant interaction between location and neighbor** (z = 9.860, df = 1, 21, p < 0.001) - the distance between the first and second neighbor differed to a higher degree in the urban center than the urban forest.
@@ -3884,7 +3916,7 @@ predictions <- predictions %>%
   rename("response" = ".fitted", "SE" = ".se.fit")
 #predictions <- summary(emmeans(dist_land, ~Land),type = "response")
 
-ggplot(near, aes(x = Land, y = RetreatDist)) + 
+dist_land_plot <- ggplot(near, aes(x = Land, y = RetreatDist)) + 
   geom_jitter(color = "grey", width = 0.1, size = 0.5) +
   geom_point(aes(x = Land, y = response, color = Land), size = 1, data = predictions) + 
   geom_errorbar(aes(x = Land, 
@@ -3893,17 +3925,19 @@ ggplot(near, aes(x = Land, y = RetreatDist)) +
   theme_classic() +
   scale_color_manual(values = c("Deciduous Forest" = "#1b9e77", "Woody Wetlands" = "#1b9e77", "Urban, High" = "#d95f02", "Urban, Medium" = "#d95f02", "Urban, Low" = "#d95f02")) +
   xlab("Land Cover Class") +
-  ylab("Distance from Focal Web \nto Neighbor Web (cm)") + 
+  ylab("Distance from Focal \nWeb to Neighbor Web (cm)") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x=element_text(colour="black", size=10)) + 
   theme(axis.text.y=element_text(colour="black", size=10)) +
   theme(legend.position = "none") +
   theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
-  annotate(geom="text", x=1, y=max(sites$NumSpiders), label="A", color="black", size = 3) +
-  annotate(geom="text", x=2, y=max(sites$NumSpiders), label="B", color="black", size = 3) +
-  annotate(geom="text", x=3, y=max(sites$NumSpiders), label="C", color="black", size = 3) +
-  annotate(geom="text", x=4, y=max(sites$NumSpiders), label="D", color="black", size = 3) +
-  annotate(geom="text", x=5, y=max(sites$NumSpiders), label="E", color="black", size = 3)
+  annotate(geom="text", x=1, y=max(near$RetreatDist), label="A", color="black", size = 3) +
+  annotate(geom="text", x=2, y=max(near$RetreatDist), label="B", color="black", size = 3) +
+  annotate(geom="text", x=3, y=max(near$RetreatDist), label="C", color="black", size = 3) +
+  annotate(geom="text", x=4, y=max(near$RetreatDist), label="D", color="black", size = 3) +
+  annotate(geom="text", x=5, y=max(near$RetreatDist), label="E", color="black", size = 3)
+
+dist_land_plot
 ```
 
 **Distance between webs significantly varies** by land cover class (Chi = 3629.3, df = 4, p < 0.001). 
@@ -4048,7 +4082,7 @@ raw <- webs %>%
             se = plotrix::std.error(RetreatHeight))
 
 
-raw_plot <- ggplot(webs, aes(x = Location, y = RetreatHeight)) + 
+raw_plot_height <- ggplot(webs, aes(x = Location, y = RetreatHeight)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = mean, color = Location), size = 2, data = raw) +
   geom_errorbar(aes(x= Location, 
@@ -4060,12 +4094,11 @@ raw_plot <- ggplot(webs, aes(x = Location, y = RetreatHeight)) +
     theme_classic() +
     scale_y_continuous(limits = c(0, 210), breaks = c(0, 35, 70, 105, 140, 175, 210)) +
     ylab("Web Height [cm]") + 
-    theme(text = element_text(size = 16)) + 
-    theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-    theme(axis.text.y = element_text(colour = "black", size = 16),
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
-    theme(legend.position = "none") +
-    ggtitle("Raw Data")
+    theme(legend.position = "none")
 
 # Non-transformed, poisson distribution
 predictions <- expand.grid(Location = levels(factor(webs$Location)))
@@ -4081,7 +4114,7 @@ predSE <- t(apply(bigBoot_height_location$t, MARGIN = 2, FUN = sd))
 predictions$SE <- predSE[1, ]
 #predictions2 <- summary(emmeans(height, ~Location | Neighbor,type = "response"))
 
-poisson_plot <- ggplot(webs, aes(x = Location, y = RetreatHeight)) + 
+poisson_plot_height <- ggplot(webs, aes(x = Location, y = RetreatHeight)) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = response, color = Location), size = 2, data = predictions) +
   geom_errorbar(aes(x= Location, 
@@ -4093,12 +4126,13 @@ poisson_plot <- ggplot(webs, aes(x = Location, y = RetreatHeight)) +
     theme_classic() +
     scale_y_continuous(limits = c(0, 210), breaks = c(0, 35, 70, 105, 140, 175, 210)) +
     ylab("Web Height [cm]") + 
-    theme(text = element_text(size = 16)) + 
-    theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-    theme(axis.text.y = element_text(colour = "black", size = 16),
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
     theme(legend.position = "none") +
-    ggtitle("Poisson Distribution")
+    annotate(geom = "text", x = 1.5, y = 210, label = "*", color = "black", size = 5)
+
 
 # Let's look at the log-transformed response variable since that is normal
 predictions <- expand.grid(Location = levels(factor(webs$Location)))
@@ -4114,7 +4148,7 @@ predSE <- t(apply(bigBoot_height_location2$t, MARGIN = 2, FUN = sd))
 predictions$SE <- predSE[1, ]
 #predictions2 <- summary(emmeans(height2, ~Location | Neighbor,type = "response"))
 
-log_plot <- ggplot(webs, aes(x = Location, y = (RetreatHeight))) + 
+log_plot_height <- ggplot(webs, aes(x = Location, y = (RetreatHeight))) + 
   geom_jitter(color = "grey", width = 0.1) +
   geom_point(aes(x = Location, y = exp(response), color = Location), size = 2, data = predictions) +
   geom_errorbar(aes(x= Location, 
@@ -4126,14 +4160,19 @@ log_plot <- ggplot(webs, aes(x = Location, y = (RetreatHeight))) +
     theme_classic() +
     scale_y_continuous(limits = c(0, 210), breaks = c(0, 35, 70, 105, 140, 175, 210)) +
     ylab("Web Height [cm]") + 
-    theme(text = element_text(size = 16)) + 
-    theme(axis.text.x = element_text(colour = "black", size = 16)) + 
-    theme(axis.text.y = element_text(colour = "black", size = 16),
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
         axis.title.x = element_blank()) +
     theme(legend.position = "none") +
-    ggtitle("Log Transformation")
+    annotate(geom = "text", x = 1.5, y = 210, label = "*", color = "black", size = 5)
 
-ggarrange(raw_plot, poisson_plot, log_plot, nrow = 1, common.legend = TRUE)
+ggarrange(raw_plot_height, 
+          poisson_plot_height, 
+          log_plot_height, 
+          labels = c("Raw Data", "Poisson Distribution", "Log-Transformed"),
+          nrow = 1, 
+          common.legend = TRUE)
 ```
 
 **Webs are significantly higher in the urban forest** than the urban center (z = -2.384, df = 1, 21, p = 0.017). 
@@ -4286,7 +4325,7 @@ R-squared = 0.4787743 (marginal - fixed) 0.9596909 (conditional - fixed and rand
 (Intercept)     0.3764     1.3417      1.3881   0.271   0.7863   
 tree100m_frac   5.0033     1.7056      1.7823   2.807   0.0050 **
 log_TotalSub    0.6815     0.3801      0.3976   1.714   0.0865 . 
-log_tdr        -0.2415     0.1683      0.1769   1.365   0.1721   
+log_tdr        -0.2415     0.1683      0.1769   1.365   0.1721 
 
 *Urban Center*
 Fixed effects:
@@ -4297,14 +4336,14 @@ log_TotalSub   0.6449     0.3921   1.645      0.1     **positive**
 R-squared = 0.1332201 (marginal - fixed) 0.9103755 (conditional - fixed and random)
 
 (conditional average) 
-                                     Estimate Std. Error Adjusted SE z value Pr(>|z|)
-(Intercept)                            2.6980     2.7479      2.7626   0.977   0.3288
+                                     Estimate Std. Error Adjusted SE z value Pr(>|z|)  
+(Intercept)                            2.6980     2.7479      2.7626   0.977   0.3288  
 log_TotalSub                           0.7725     0.4093      0.4138   1.867   0.0619 .
-scale(road_length_m, center = FALSE)   1.0413     0.7533      0.7625   1.366   0.1720
-log_tdh                               -0.3763     0.3175      0.3212   1.172   0.2413
-log_tdr                               -0.2307     0.1466      0.1483   1.555   0.1199
-log_patch                              0.2033     0.1934      0.1959   1.038   0.2994
-scale(spec_rad, center = FALSE)       -5.6099     6.2722      6.3531   0.883   0.3772 
+scale(road_length_m, center = FALSE)   1.0413     0.7533      0.7625   1.366   0.1720  
+log_tdh                               -0.3763     0.3175      0.3212   1.172   0.2413  
+log_tdr                               -0.2307     0.1466      0.1483   1.555   0.1199  
+log_patch                              0.2033     0.1934      0.1959   1.038   0.2994  
+scale(spec_rad, center = FALSE)       -5.6099     6.2722      6.3531   0.883   0.3772
 
 ```{r height_predictor_overall_graphs}
 colorc = "#d95f02" 
@@ -4523,7 +4562,7 @@ predSE <- t(apply(bigBoot_height_land$t, MARGIN = 2, FUN = sd))
 predictions$SE <- predSE[1, ]
 #predictions2 <- summary(emmeans(height_land, ~Land,type = "response"))
 
-ggplot(webs, aes(x = Land, y = RetreatHeight)) + 
+height_land_plot <- ggplot(webs, aes(x = Land, y = RetreatHeight)) + 
   geom_jitter(color = "grey", width = 0.1, size = 0.5) +
   geom_point(aes(x = Land, y = response, color = Land), size = 1, data = predictions) + 
   geom_errorbar(aes(x = Land, 
@@ -4543,6 +4582,358 @@ ggplot(webs, aes(x = Land, y = RetreatHeight)) +
   annotate(geom="text", x=3, y=max(webs$RetreatHeight), label="A", color="black", size = 3) +
   annotate(geom="text", x=4, y=max(webs$RetreatHeight), label="A", color="black", size = 3) +
   annotate(geom="text", x=5, y=max(webs$RetreatHeight), label="A", color="black", size = 3)
+
+height_land_plot
 ```
 
 **Web height varies significantly** across land cover class (chi = 10.495, df = 4, p = 0.033). 
+
+## Figures for Manuscript
+
+### Measurement by Location Figure
+
+```{r main}
+blankPlot <- ggplot() + 
+  geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing()
+
+main_row1 <- ggarrange(poisson_plot_search, poisson_plot_webs, poisson_plot_spiders, labels = c("a", "b", "c"), nrow = 1, font.label = list(size = 10))
+main_row2 <- ggarrange(poisson_plot_dist, poisson_plot_height, blankPlot, labels = c("d", "e", ""), nrow = 1, font.label = list(size = 10))
+main <- ggarrange(main_row1, main_row2, nrow = 2, font.label = list(size = 10))
+
+#saveRDS(main, "manuscript/figures/main.Rds")
+```
+
+### Predictors of Web and Spider Abundance
+
+```{r predictors_abund}
+webs_text <- as_ggplot(text_grob(paste("Number of \nWebs \n[log()]"), size = 10))
+spiders_text <- as_ggplot(text_grob(paste("Number of \nSpiders \n[log()]"), size = 10))
+plant_text <- as_ggplot(text_grob(paste("Plant Species \nRichness \n[log()]"), size = 10))
+patch_text <-as_ggplot(text_grob(paste("Patch Area \n[log(km²)]"), size = 10))
+highway_text <- as_ggplot(text_grob(paste("Highway Disturb. \n[log(cars/\nday/m)]"), size = 10))
+rlength_text <- as_ggplot(text_grob(paste("Road \nLength [m]"), size = 10))
+blankPlot <- ggplot()+geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing() 
+
+pa <- ggarrange(webs_text, webs_center_plant, webs_center_patch, webs_center_tdh, webs_center_road,
+           spiders_text, spiders_center_plant, spiders_center_patch, spiders_center_tdh, spiders_center_road,
+          ncol = 5, nrow = 2, widths = c(0.1, 0.225, 0.225, 0.225, 0.225))
+
+labels <- ggarrange(blankPlot, plant_text, patch_text, highway_text, rlength_text, ncol = 5, nrow = 1, widths = c(0.1, 0.225, 0.225, 0.225, 0.225))
+
+predictors_abund <- ggarrange(pa, labels, nrow = 2, heights = c(0.8, 0.2))
+#saveRDS(predictors_abund, "manuscript/figures/predictors_abund.Rds")
+```
+
+### Predictors of Aggregation
+
+```{r predictors_agg}
+wd_text1 <- as_ggplot(text_grob(paste("Forest \nNearest \nNeighbor \nDist. [log(cm)]"), size = 10))
+wd_text2 <- as_ggplot(text_grob(paste("Center \nNearest \nNeighbor \nDist. [log(cm)]"), size = 10))
+tree_text <- as_ggplot(text_grob(paste("Tree Cover [%]"), size = 10))
+plant_text <- as_ggplot(text_grob(paste("Plant Species \nRichness \n[log()]"), size = 10))
+road_text <- as_ggplot(text_grob(paste("Road Disturb. \n[log(cars/day/m)]"), size = 10))
+highway_text <- as_ggplot(text_grob(paste("Highway Disturb. \n[log(cars/day/m)]"), size = 10))
+spec_text <- as_ggplot(text_grob(paste("Spectral \nRadiance \n[Watts/(m²*sr*µm)]"), size = 10))
+rlength_text <- as_ggplot(text_grob(paste("Road \nLength [m]"), size = 10))
+blankPlot <- ggplot()+geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing() 
+
+agg1 <- ggarrange(wd_text1, dist_forest_plant, dist_forest_tree, dist_forest_tdr, dist_forest_tdh,
+          ncol = 5, nrow = 1, widths = c(0.12, 0.22, 0.22, 0.22, 0.22))
+
+agg2 <- ggarrange(wd_text2, dist_center_plant, dist_center_spec, dist_center_road, blankPlot,
+          ncol = 5, nrow = 1, widths = c(0.12, 0.22, 0.22, 0.22, 0.22))
+
+labels1 <- ggarrange(blankPlot, plant_text, tree_text, road_text, highway_text, ncol = 5, nrow = 1, widths = c(0.1, 0.225, 0.225, 0.225, 0.225))
+
+labels2 <- ggarrange(blankPlot, plant_text, spec_text, rlength_text, blankPlot, ncol = 5, nrow = 1, widths = c(0.1, 0.225, 0.225, 0.225, 0.225))
+
+predictors_agg <- ggarrange(agg1, labels1, agg2, labels2, nrow = 4, heights = c(0.35, 0.15, 0.35, 0.15))
+#saveRDS(predictors_agg, "manuscript/figures/predictors_agg.Rds")
+```
+
+## Tables for Manuscript
+
+### Landscape Features by Location
+
+```{r landscape_table}
+rownames(land_cover) <- c("Area (sq. km)", "Tree Cover (%)", "Impervious Cover (%)", "Urban Cover (%)", "Urban, High Intensity (%)", "Urban, Medium Intensity (%)", "Urban, low Intensity (%)", "Urban, Open Space (%)", "Forest Cover (%)", "Deciduous Forest (%)", "Mixed Forest (%)", "Evergreen Forest (%)", "Woody Wetlands (%)", "Other Cover (%)", "Herbaceous Wetlands (%)", "Grassland Herbaceous (%)", "Pasture (%)", "Cultivated Crop (%)", "Open Water (%)")
+names <- rownames(land_cover)
+rownames(land_cover) <- seq(1:nrow(land_cover))
+land_cover <- cbind(names, land_cover)
+colnames(land_cover) <- c(" ", "Lincoln City Limits", "UNL City Campus \nUrban Center", "Wilderness Park \nUrban Forest")
+flextable(land_cover[ ,1:4]) %>% 
+  autofit() %>% 
+  hline(i = c("3", "4", "8", "9", "13", "14"), part = "body") %>% 
+  bg(i = c("4", "9", "14"), bg = "grey95") %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  set_caption("") %>% 
+  save_as_image(path = here::here("manuscript/figures/landscape.png"))
+```
+
+### Predictors by Location
+
+```{r pred_location, fig.width = 6.85, dpi = 300}
+mean_se1 <- c("Mean ± Std. Error", "Wilderness Park \nUrban Forest", "47.15 ± 2.17", "1.27 ± 0.36", "137.44 ± 3.71", "5.89 ± 0.77", "12.18 ± 1.65", "37,049.12 ± 2.79", "52.98 ± 1.88", "33.78 ± 1.81", "15.67 ± 1.25")
+mean_se2 <- c("Mean ± Std. Error", "UNL City Campus \n Urban Center", "1.58 ± 0.36", "76.52 ± 2.53", "153.39 ± 3.58", "116.90 ± 3.12", "2.97 ± 1.35", "437.03 ± 2.04", "194.42 ± 1.94", "52.46 ± 1.78", "93.03 ± 2.78")
+pred_location <- data.frame(mean_se1, mean_se2)
+rownames(pred_location) <- c("", " ", "Percent Tree Cover [%]", "Percent Impervious Cover [%]", "Spectral Radiance [Watts/(m² * sr * µm)]", "Artificial Night Sky Radiance [mcd/m²]", "Plant Species Richness", "Patch Area [m²]", "Road Disturbance [vehicles/day/m]", "Highway Disturbance [vehicles/day/m]", "Total Road Length [m]")
+names <- rownames(pred_location)
+rownames(pred_location) <- seq(1:nrow(pred_location))
+pred_location <- cbind(names, pred_location)
+colnames(pred_location) <- c(" ", "Mean ± Std. Error", "Mean ± Std. Error")
+flextable(pred_location[ ,1:3]) %>% 
+  delete_part(part = "header") %>% 
+  autofit() %>% 
+  merge_h(part = "body") %>% 
+  bold(bold = TRUE,i = c("1", "2"), part = "body") %>% 
+  hline(i = c("1", "2", "11"), part = "body", border = officer::fp_border(width = 2)) %>% 
+  hline_top(part = "body", border = officer::fp_border(width = 2)) %>% 
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  set_caption("") %>% 
+  save_as_image(path = here::here("manuscript/figures/pred_location.png"))
+```
+
+### Predictor Stats Table
+
+```{r pred_table}
+pred_table <- read.table(file = "data/pred_table.txt", header = TRUE) # for predictor stats table
+
+pred_table <- pred_table %>% 
+  mutate(Variable = factor(Variable),
+         Variable = fct_recode(Variable, "Number of Webs" = "NumWebs",
+                               "Number of Spiders" = "NumSpiders",
+                               "Nearest Neighbor Distance" = "RetreatDist",
+                               "Web Height" = "RetreatHeight"),
+         Predictor = factor(Predictor),
+         Predictor = fct_recode(Predictor, "Plant Species Richness" = "plant",
+                                "Road Disturbance" = "tdr",
+                                "Highway Disturbance" = "tdh",
+                                "Patch Area" = "patch",
+                                "Total Road Length" = "road",
+                                "Spectral Radiance" = "spec",
+                                "Percent Tree Cover" = "tree",
+                                "Proportion Tree Cover" = "tree_frac"),
+         org_Estimate = round(org_Estimate, 3),
+         bt_Estimate = round(bt_Estimate, 3),
+         org_SE = round(org_SE, 3),
+         bt_SE = round(bt_SE, 3),
+         Z = round(Z, 3),
+         P = round(P, 3),
+         R = round(R, 3),
+         AICc = round(AICc, 3))
+
+pred_table[pred_table == 0] <- ""
+
+pred_table <- pred_table %>% 
+  mutate(P = fct_recode(P, "< 0.001 ***" = "0.001",
+                        "   0.010 **" = "0.01",
+                        "   0.003 **" = "0.003",
+                        "   0.004 **" = "0.004",
+                        "   0.064 ." = "0.064",
+                        "   0.100 ." = "0.1")) %>% 
+  dplyr::select(-bt_Estimate, -bt_SE)
+
+colnames(pred_table) <- c('Variable','Model','Predictor', 'Estimate', 'Standard \nError', 'Z-Value', 'P-Value', 'McFadden\'s \nR²', 'AICc \nWeight')
+
+flextable(pred_table[ , 1:9]) %>% 
+  autofit() %>% 
+  merge_v(j = c('Variable', 'Model', 'McFadden\'s \nR²', 'AICc \nWeight'), part = "body") %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  hline_bottom(part = "body", border = officer::fp_border(width = 2)) %>% 
+  border(j = 'Variable', border.bottom = officer::fp_border(width = 2)) %>% 
+  hline(i = c("8", "15", "24"), part = "body", border = officer::fp_border(width = 2)) %>%     
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  valign(valign = "top", part = "all") %>% 
+  set_caption("") %>% 
+  footnote(i = c(1:3, 5:7, 9:10, 12:14, 16:17, 19:22, 25:26, 28), j = 3, value = as_paragraph(
+    c("Predictors that were log-transformed prior to model evaluation. Estimate and standard errors are not back transformed.")), 
+    ref_symbols = c("a"), part = "body") %>% 
+    footnote(i = 27, j = 3, value = as_paragraph(
+    c("Tree cover is assessed as proportion (value from 0 to 1) rather than a percent (values 0 to 100) to avoid model convergence issues.")), 
+    ref_symbols = c("b"), part = "body") %>% 
+  save_as_image(path = here::here("manuscript/figures/pred_table.png"))
+```
+
+## Supplementary Figures and Tables
+
+### Substrate Figures
+
+```{r substrate}
+substrates %>% 
+  mutate(Location = fct_recode(Location, "Urban Center" = "Campus", "Urban Forest" = "Forest"),
+         Location = fct_relevel(Location, "Urban Forest", "Urban Center")) %>% 
+  ggplot(aes(x = Location, y = Number, fill = factor(Type, levels=c("Cement", "Metal", "Plastic", "Rocks", "Herb", "Litter", "Shrub", "Tree", "Vine")))) + 
+  geom_bar(position = "fill",stat = "identity", alpha=1.0) + 
+  scale_y_continuous(labels = scales::percent_format()) + 
+  theme(axis.title.x = element_blank()) + 
+  xlab("Collection Location") +
+  ylab("Percent of Web Substrates") + 
+  theme_classic() +
+  theme(text = element_text(size = 10)) + 
+  scale_fill_manual(values = c("#D94701", "#FD8D3C", "#FDBE85", "#FEEDDE", "#006D2C", "#31A354", "#74C476", "#BAE4B3", "#EDF8E9"), 
+                    labels = c("Cement", "Metal", "Plastic", "Rocks", "Herb", "Litter", "Shrub", "Tree", "Vine")) + 
+  labs(fill="Substrate Material") + 
+  theme(axis.text.x=element_text(colour="black", size=10)) + 
+  theme(axis.text.y=element_text(colour="black", size=10)) +
+  theme(legend.text=element_text(size=10))
+  ggsave("manuscript/figures/substrate_plot.png")
+```
+
+### Overall Predictor Plots
+```{r predictors_overall}
+dist_text <- as_ggplot(text_grob(paste("Search \nDistance \n[log(m)]"), size = 10))
+webs_text <- as_ggplot(text_grob(paste("Number of \nWebs \n[log()]"), size = 10))
+spiders_text <- as_ggplot(text_grob(paste("Number of \nSpiders \n[log()]"), size = 10))
+wd_text <- as_ggplot(text_grob(paste("Nearest \nNeighbor \nDist. [log(cm)]"), size = 10))
+wh_text <- as_ggplot(text_grob(paste("Web \nHeight \n[log(cm)]"), size = 10))
+plant_text <- as_ggplot(text_grob(paste("Plant Species \nRichness [log()]"), size = 10))
+road_text <- as_ggplot(text_grob(paste("Road Disturbance \n[log(vehicles/day/m)]"), size = 10))
+highway_text <- as_ggplot(text_grob(paste("Highway Disturbance \n[log(vehicles/day/m)]"), size = 10))
+blankPlot <- ggplot()+geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing() 
+greyPlot <- ggplot()+geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing() +
+  theme(panel.background = element_rect(fill = "grey", color = "white"))
+
+graphs <- ggarrange(webs_text, webs_plant, webs_tdr, webs_tdh,
+           spiders_text, spiders_plant, greyPlot, spiders_tdh,
+           wd_text, dist_plant, dist_tdr, greyPlot, 
+           wh_text, height_plant, height_tdr, greyPlot, 
+          ncol = 4, nrow = 4)
+
+labels <- ggarrange(blankPlot, plant_text, road_text, highway_text, ncol = 4, nrow = 1)
+
+predictors_overall <- ggarrange(graphs, labels, nrow = 2, heights = c(0.8, 0.2))
+#saveRDS(predictors_overall, "manuscript/figures/predictors_overall.Rds")
+```
+
+## Response Variables by Land Cover Class
+
+```{r land_plots}
+land_plots <- ggarrange(search_land_plot, ggarrange(webs_land_plot_nox, spiders_land_plot_nox,dist_land_plot, height_land_plot, labels = c("b", "c", "d", "e"), ncol = 2, nrow = 2, legend = "none", align = "hv"), labels = c("a"), widths = c(0.3, 0.7))
+
+land_plots
+#saveRDS(land_plots, "manuscript/figures/land_plots.Rds")
+```
+
+## Site Information Table
+
+```{r site_info}
+site_info <- site_info %>% 
+  mutate(Location = fct_recode(Location, "UNL City Campus - Urban Center" = "Campus", "Wilderness Park - Urban Forest" = "Forest"))
+colnames(site_info) <- c("Location", "Site ID", "Date", "Start Latitude", "Start Longitude", "Focal Web Latitude", "Focal Web Longitude", "Search Direction")
+flextable(site_info[ ,1:8]) %>% 
+  merge_v(j = "Location") %>% 
+  autofit(part = "body") %>% 
+  hline(i = c("12"), part = "body") %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  set_caption("") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  fix_border_issues(part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  save_as_image(path = here::here("manuscript/figures/site_info.png"))
+```
+
+## Table of Predictor Stats from Model Average
+
+```{r pred_table_avg}
+pred_table_avg <- read.table(file = "data/pred_table_avg.txt", header = TRUE) # for predictor stats table
+
+pred_table_avg <- pred_table_avg %>% 
+  mutate(Variable = factor(Variable),
+         Variable = fct_recode(Variable, "Number of Webs" = "NumWebs",
+                               "Nearest Neighbor Distance" = "RetreatDist",
+                               "Web Height" = "RetreatHeight"),
+         Predictor = factor(Predictor),
+         Predictor = fct_recode(Predictor, "Plant Species Richness" = "plant",
+                                "Road Disturbance" = "tdr",
+                                "Highway Disturbance" = "tdh",
+                                "Patch Area" = "patch",
+                                "Total Road Length" = "road",
+                                "Spectral Radiance" = "spec",
+                                "Percent Tree Cover" = "tree",
+                                "Proportion Tree Cover" = "tree_frac",
+                                "Spectral Radiance" = "spec_scale",
+                                "Total Road Length" = "road_scale"),
+         Model = factor(Model), 
+         Model = fct_recode(Model, "Center " = "Center2"),
+         Estimate = round(Estimate, 3),
+         SE = round(SE, 3),
+         Z = round(Z, 3),
+         P = round(P, 3),
+         AICc = round(AICc, 3))
+
+pred_table_avg <- pred_table_avg %>% 
+  mutate(P = factor(P),
+    P = fct_recode(P, "< 0.001 ***" = "0.001",
+                        "   0.033 *" = "0.033",
+                        "   0.003 **" = "0.003",
+                        "   0.043 *" = "0.043",
+                        "   0.010 *" = "0.01",
+                        "   0.054 ." = "0.054",
+                        "   0.228" = "0.228",
+                        "   0.005 **" = "0.005",
+                        "   0.086 ." = "0.086",
+                        "   0.172" = "0.172",
+                        "   0.062 ." = "0.062",
+                        "   0.299" = "0.299",
+                        "   0.377" = "0.377",
+                        "   0.120" = "0.12",
+                        "   0.241" = "0.241",
+                        "   0.172" = "0.172")) 
+
+colnames(pred_table_avg) <- c('Variable','Model','Predictor', 'Estimate', 'Adj. Standard \nError', 'Z-Value', 'P-Value', 'AICc \nWeight')
+
+#saveRDS(pred_table_avg, file = "manuscript/figures/pred_table_avg.Rds")
+
+flextable(pred_table_avg[ , 1:8]) %>% 
+  autofit() %>% 
+  merge_v(j = c('Variable', 'Model', 'AICc \nWeight'), part = "body") %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  hline_bottom(part = "body", border = officer::fp_border(width = 2)) %>% 
+  border(j = 'Variable', border.bottom = officer::fp_border(width = 2)) %>% 
+  hline(i = c("4", "8"), part = "body", border = officer::fp_border(width = 2)) %>%   
+  fix_border_issues(part = "all") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  valign(valign = "top", part = "all") %>% 
+  set_caption("") %>% 
+  footnote(i = c(1:3, 5:6, 9:11, 13:16, 18:19), j = 3, value = as_paragraph(
+    c("Predictors that were log-transformed prior to model evaluation. Estimate and standard errors are not back transformed.")), 
+    ref_symbols = c("a"), part = "body") %>% 
+    footnote(i = 12, j = 3, value = as_paragraph(
+    c("Tree cover is assessed as proportion (value from 0 to 1) rather than a percent (values 0 to 100) to avoid model convergence issues.")), 
+    ref_symbols = c("b"), part = "body") %>% 
+  footnote(i = c(17, 20), j = 3, value = as_paragraph(
+    c("Predictors were scaled (each value divided by the standard deviation) prior to model evaluation. Estimate and standard errors are not back transformed.")), 
+    ref_symbols = c("c"), part = "body")  %>% 
+  save_as_image(path = here::here("manuscript/figures/pred_table_avg.png"))
+```
+
+## Table of Land Stats
+
+```{r land_stats}
+Variable <- c("Search Distance", "Number of Webs", "Number of Spiders", "Neares Neighbor Distance", "Web Height")
+Chi <- c(340.32, 106.67, 31.65, 3629.30, 10.496)
+df <- c("4, 21", "4, 21", "4, 21", "4, 20", "4, 130")
+P <- c("< 0.001 ***", "< 0.001 ***", "< 0.001 ***", "< 0.001 ***", "  0.033 *")
+land_stats <- data.frame(Variable, Chi, df, P)
+colnames(land_stats) <- c('Variable','Likelihood Ratio \nChi-Squared','Degrees of Freedom', 'P-Value')
+
+flextable(land_stats[ , 1:4]) %>% 
+  autofit() %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  valign(valign = "top", part = "all") %>% 
+  set_caption("") %>% 
+  save_as_image(path = here::here("manuscript/figures/land_stats.png"))
+```

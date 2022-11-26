@@ -1,0 +1,145 @@
+---
+output: 
+  bookdown::word_document2:
+    reference_docx: word_styles_reference_01.docx
+    fig_caption: true
+    number_sections: false
+bibliography: [citations.bib]
+csl: apa.csl
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knitr::opts_knit$set(root.dir = "/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript")
+require(knitr)
+require(kfigr) # devtools::install_github("github mkoohafkan/kfigr")
+```
+
+```{r libraries, include = FALSE}
+library(tidyverse)
+library(flextable)
+```
+
+## Supplemental Figures
+
+```{r map, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/locations_sites.png")
+```
+
+**Fig. S1** Locations of data collection in Lincoln, Nebraska, USA (a). The University of Nebraska-Lincoln (UNL) City Campus (b) is located in downtown Lincoln. Wilderness Park (c) is an urban forest located southwest of downtown Lincoln and at the periphery of the city limits. Site markers indicate the site of the focal web. See table S1 for coordinates of start sites and focal web sites
+
+\newpage
+
+```{r map2, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/site_examples.png")
+```
+
+**Fig. S2** Wilderness Park and University of Nebraska-Lincoln (UNL) City Campus sites F01 (a) and C23 (b), respectively, where the circled flags indicate individiual webs of *Agelenopsis pennsylvanica*
+
+\newpage
+
+```{r imperv_location, fig.width = 6.85, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/imperv_locations.png")
+```
+
+**Fig. S2** Impervious cover raster with borders for Lincoln, Nebraska, USA city limits (dashed border), University of Nebraska-Lincoln (UNL) City Campus (solid border, a), and Wilderness Park (solid border, b) using the 2019 National Land Cover Data on Impervious Cover and QGIS (v. 3.16.3-Hannover, ESRI 102704)
+
+\newpage
+
+```{r tree_location, fig.width = 6.85, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/tree_locations.png")
+```
+
+**Fig. S3** Tree cover raster with borders for Lincoln, Nebraska, USA city limits (dashed border), University of Nebraska-Lincoln (UNL) City Campus (solid border, a), and Wilderness Park (solid border, b) using the 2016 National Land Cover Data on Tree Cover and QGIS (v. 3.16.3-Hannover, ESRI 102704)
+
+\newpage
+
+```{r spec_location, fig.width = 6.85, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/surf_locations.png")
+```
+
+**Fig. S4** Spectral radiance raster with borders for Lincoln, Nebraska, USA city limits (dashed border), University of Nebraska-Lincoln (UNL) City Campus (solid border, a), and Wilderness Park (solid border, b) using the satellite image of path 28, row 32 of the Landsat-7 World Reference System-2 (Band 6, September 2, 2020) and QGIS (v. 3.16.3-Hannover, ESRI 102704)
+
+\newpage  
+
+```{r light_location, fig.width = 6.85, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/light_pollution_locations.png")
+```
+
+**Fig. S5** Artificial light at night radiance raster with borders for Lincoln, Nebraska, USA city limits (dashed border), University of Nebraska-Lincoln (UNL) City Campus (solid border, a), and Wilderness Park (solid border, b) using the 2020 Visible Infrared Imaging Radiometer Suite (VIIRS) and QGIS (v. 3.16.3-Hannover, ESRI 102704)
+
+\newpage
+
+```{r intersections, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/intersections.png")
+```
+
+**Fig. S6** Intersections randomly chosen from as starting sites. We selected Wilderness Park intersections (left) from trail intersections where 3 or more paths meet. The University of Nebraska-Lincoln (UNL) City Campus intersections (right) were selected from sidewalk and road intersections that met from the four cardinal directions. Sites that we used as starting sites are indicated in red
+
+\newpage
+
+```{r paths, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/paths.jpg")
+```
+
+**Fig. S7** Paths walked from the starting site until the first occupied web (the focal web). Site ID is labeled at the focal web site. Wilderness Park sites (left) are outlined in green, and University of Nebraska-Lincoln (UNL) City Campus sites (right) are outlined in orange
+
+\newpage
+
+```{r plants_image, fig.width = 6.85, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/plants.png")
+```
+
+**Fig. S8** Plant species found within a ten-meter radius of focal web at each site. Plant species at each site are underneath the colored and labeled site indicator (orange for University of Nebraska-Lincoln (UNL) City Campus and green for Wilderness Park). Plant species used as web substrates are highlighted in yellow. These data do not suggest equivalent prevalence of each species, but rather list available substrates for spiders
+
+\newpage 
+
+```{r substrates, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/substrate_plot.png")
+```
+
+**Fig. S9** Representation of web substrates by class. Green shades indicate plant material classes, and orange indicates non-plant materials
+
+\newpage
+
+```{r pred_overall, fig.width = 6.85, fig.height = 7, dpi = 300}
+predictors_overall <- readRDS("figures/predictors_overall.Rds")
+predictors_overall
+```
+
+**Fig.S10** Significant correlations between response variables (number of webs, number of spiders, nearest neighbor distance, and web height) and the environmental predictors (plant species richness and road disturbance and highway disturbance) for the whole data set. The regression lines and shaded regions represent the predictions and 95% confidence intervals (respectively) from the top Poisson Generalized Linear Model after AIC selection. Predictor variables not included in the top model are shaded grey. The points represent the raw data. Asterisks indicate significance level (*** *P* < 0.001; ** *P* < 0.01; * *P* < 0.05)
+
+\newpage
+
+```{r land_plots, fig.width = 6.85, fig.height = 6.5, dpi = 300}
+land_plots <- readRDS("figures/land_plots.Rds")
+land_plots
+```
+
+**Fig. S11** Comparison of search distance (a), the number of webs (b) and spiders (c) in a 10-meter radius of the focal web, the distance from the focal web to the first (d) and second (e) nearest neighbors, and web height (f) by land cover class - deciduous forest, woody wetlands, urban high intensity, urban medium intensity, and urban low intensity. Land cover class was determined using the pixel category from the 2019 National Land Cover Data that the focal web site resides in. Grey jittered points represent the raw data while colored points (green = urban forest, orange = urban center) and error bars represent the mean and 95% confidence intervals, respectively, from Poisson Generalized Linear Model predictions. Unique letters indicate significance. See supplemental tables (S2-6) for statistical analysis
+
+\newpage
+
+## Supplemental Tables
+
+**Table S1** Geographical information for the University of Nebraska-Lincoln (UNL) City Campus and Wilderness Park Sites
+
+```{r site_info, fig.width = 5, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/site_info.png")
+```
+
+\newpage
+
+**Table S2** Results of model averages (all models within 2 detla AICc points) from Poisson Generalized Linear Models with the environmental predictors for data overall and subset by habitat (urban forest and urban center), where applicable. Asterisks indicate significance level (*** *P* < 0.001; ** *P* < 0.01; * *P* < 0.05)
+
+```{r mod_avg, fig.width = 5, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/pred_table_avg.png")
+```
+
+\newpage
+
+**Table S3** Statistical results of Likelihood Ratio Tests following Poisson Generalized Linear Models for each response variable by land cover class. Significance indicated by asterisks (*** *P* < 0.001; ** *P* < 0.01; * *P* < 0.05).
+
+```{r land_stats, fig.width = 5, dpi = 300}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/land_stats.png")
+```
