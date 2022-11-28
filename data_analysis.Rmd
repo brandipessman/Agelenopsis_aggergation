@@ -457,7 +457,7 @@ ggarrange(resid_tree, qq_tree,
           ncol = 2, nrow = 1)
 ```
 
-Tree cover is **significantly higher in the urban forest** than the urban center (z = -14.50, df = 1, 20, p < 0.001). The means and SE's are 47.15 ± 2.17 % for the urban forest and 1.58 ± 0.36 % for the urban center. 
+Tree cover is **significantly higher in the urban forest** than the urban center (z = -14.50, df = 1, 21, p < 0.001). The means and SE's are 47.15 ± 2.17 % for the urban forest and 1.58 ± 0.36 % for the urban center. 
 
 ```{r stats_graphs_imperv, echo = FALSE}
 imperv100m <- glm(imperv100m ~ Location, family = "poisson", data = sites)
@@ -525,26 +525,26 @@ ggarrange(resid_imperv, qq_imperv,
           ncol = 2, nrow = 1)
 ```
 
-Impervious cover is **significantly higher in the urban center** than the urban forest (z = 14.51, df = 1, 20, p < 0.001). The means and SE's are 1.27 ± 0.36 % for the urban forest and 76.52 ± 2.53 % for the urban center. 
+Impervious cover is **significantly higher in the urban center** than the urban forest (z = 14.51, df = 1, 21, p < 0.001). The means and SE's are 1.27 ± 0.36 % for the urban forest and 76.52 ± 2.53 % for the urban center. 
 
 ```{r stats_graphs_tdr, echo = FALSE}
-tdr <- glm(log_tdr ~ Location, family = "poisson", data = sites)
+tdr <- glm(Traffic_Dist_Road ~ Location, family = "poisson", data = sites)
 summary(tdr)
 
 sites %>% 
   group_by(Location) %>% 
-  summarize(mean = mean(log_tdr),
-            se = plotrix::std.error(log_tdr))
+  summarize(mean = mean(Traffic_Dist_Road),
+            se = plotrix::std.error(Traffic_Dist_Road))
 
 predictions <- summary(emmeans(tdr, ~Location),type = "response")
 predictions
 
-ggplot(sites, aes(x = Location, y = exp(log_tdr))) + 
+ggplot(sites, aes(x = Location, y = Traffic_Dist_Road)) + 
   geom_jitter(color = "grey", width = 0.1, size = 1) +
-  geom_point(aes(x = Location, y = exp(rate), color = Location), size = 2, data = predictions) + 
+  geom_point(aes(x = Location, y = (rate), color = Location), size = 2, data = predictions) + 
   geom_errorbar(aes(x = Location, 
-                  ymin = exp(rate - SE), 
-                  ymax = exp(rate + SE),
+                  ymin = (rate - SE), 
+                  ymax = (rate + SE),
                   color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, linewidth = 1.5) +
   scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
   scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
@@ -556,7 +556,7 @@ ggplot(sites, aes(x = Location, y = exp(log_tdr))) +
   theme(axis.text.y=element_text(colour="black", size=18),
         axis.title.x = element_blank()) +
   theme(legend.position = "none") +
-  annotate(geom="text", x=1.5, y=1400, label="N. S.", color="black", size = 10)
+  annotate(geom="text", x=1.5, y=1400, label="***", color="black", size = 10)
 ```
 
 ```{r tdr_assumptions, echo = FALSE}
@@ -592,26 +592,26 @@ ggarrange(resid_tdr, qq_tdr,
           ncol = 2, nrow = 1)
 ```
 
-There is **no difference** in road disturbance between the urban forest and urban center (z = 1.403, df = 1, 20, p = 0.161). The means and SE's are `r exp(3.97)` ± `r exp(0.630)` vehicles/day/m for the urban forest and `r exp(5.27)` ± `r exp(0.663)` vehicles/day/m for the urban center. 
+**Road disturbance is higher in the urban center** than the urban forest (z = 39.19, df = 1, 21, p < 0.001). The means and SE's are 104 ± 3.23 vehicles/day/m for the urban forest and 398 ± 5.76 vehicles/day/m for the urban center. 
 
 ```{r stats_graphs_tdh, echo = FALSE}
-tdh <- glm(log_tdh ~ Location, family = "poisson", data = sites)
+tdh <- glm(Traffic_Dist_Highway ~ Location, family = "poisson", data = sites)
 summary(tdh)
 
 sites %>% 
   group_by(Location) %>% 
-  summarize(mean = mean(log_tdh),
-            se = plotrix::std.error(log_tdh))
+  summarize(mean = mean(Traffic_Dist_Highway),
+            se = plotrix::std.error(Traffic_Dist_Highway))
 
 predictions <- summary(emmeans(tdh, ~Location),type = "response")
 predictions
 
-ggplot(sites, aes(x = Location, y = exp(log_tdh))) + 
+ggplot(sites, aes(x = Location, y = (Traffic_Dist_Highway))) + 
   geom_jitter(color = "grey", width = 0.1, size = 1) +
-  geom_point(aes(x = Location, y = exp(rate), color = Location), size = 2, data = predictions) + 
+  geom_point(aes(x = Location, y = (rate), color = Location), size = 2, data = predictions) + 
   geom_errorbar(aes(x = Location, 
-                  ymin = exp(rate - SE), 
-                  ymax = exp(rate + SE),
+                  ymin = (rate - SE), 
+                  ymax = (rate + SE),
                   color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, linewidth = 1.5) +
   scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
   scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
@@ -623,7 +623,7 @@ ggplot(sites, aes(x = Location, y = exp(log_tdh))) +
   theme(axis.text.y=element_text(colour="black", size=18),
         axis.title.x = element_blank()) +
   theme(legend.position = "none") +
-  annotate(geom="text", x=1.5, y=250, label="N. S.", color="black", size = 10)
+  annotate(geom="text", x=1.5, y=250, label="***", color="black", size = 10)
 ```
 
 ```{r tdh_assumptions, echo = FALSE}
@@ -659,26 +659,26 @@ ggarrange(resid_tdh, qq_tdh,
           ncol = 2, nrow = 1)
 ```
 
-There is **no difference** in highway disturbance between the urban forest and urban center (z = 0.530, df = 1, 20, p = 0.596). The means and SE's are `r exp(3.52)` ± `r exp(0.593)` vehicles/day/m for the urban forest and `r exp(3.96)` ± `r exp(0.574)` vehicles/day/m for the urban center. 
+**Highway disturbance is higher in the urban center** than the urban fores (z = 9.388, df = 1, 21, p < 0.001). The means and SE's are 35.6 ± 1.89 vehicles/day/m for the urban forest and 65.0 ± 2.33 vehicles/day/m for the urban center. 
 
 ```{r stats_graphs_plant, echo = FALSE}
-plant <- glm(log_TotalSub ~ Location, family = "poisson", data = sites)
+plant <- glm(TotalSub ~ Location, family = "poisson", data = sites)
 summary(plant)
 
 sites %>% 
   group_by(Location) %>% 
-  summarize(mean = mean(log_TotalSub),
-            se = plotrix::std.error(log_TotalSub))
+  summarize(mean = mean(TotalSub),
+            se = plotrix::std.error(TotalSub))
 
 predictions <- summary(emmeans(plant, ~Location),type = "response")
 predictions
 
-ggplot(sites, aes(x = Location, y = exp(log_TotalSub))) + 
+ggplot(sites, aes(x = Location, y = (TotalSub))) + 
   geom_jitter(color = "grey", width = 0.1, size = 1) +
-  geom_point(aes(x = Location, y = exp(rate), color = Location), size = 2, data = predictions) + 
+  geom_point(aes(x = Location, y = (rate), color = Location), size = 2, data = predictions) + 
   geom_errorbar(aes(x = Location, 
-                  ymin = exp(rate - SE), 
-                  ymax = exp(rate + SE),
+                  ymin = (rate - SE), 
+                  ymax = (rate + SE),
                   color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, linewidth = 1.5) +
   scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
   scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
@@ -690,7 +690,7 @@ ggplot(sites, aes(x = Location, y = exp(log_TotalSub))) +
   theme(axis.text.y=element_text(colour="black", size=18),
         axis.title.x = element_blank()) +
   theme(legend.position = "none") +
-  annotate(geom="text", x=1.5, y=25, label="*", color="black", size = 10)
+  annotate(geom="text", x=1.5, y=25, label="***", color="black", size = 10)
 ```
 
 ```{r plant_assumptions, echo = FALSE}
@@ -726,7 +726,7 @@ ggarrange(resid_plant, qq_plant,
           ncol = 2, nrow = 1)
 ```
 
-Plant species richness is **significantly higher in the urban forest** than the urban center (z = -2.430, df = 1, 20, p = 0.015). The means and SE's are `r exp(2.50)` ± `r exp(0.500)` species for the urban forest and `r exp(1.09)` ± `r exp(0.302)` species for the urban center. 
+Plant species richness is **significantly higher in the urban forest** than the urban center (z = -7.674, df = 1, 21, p < 0.001). The means and SE's are 13.30 ± 1.153 species for the urban forest and 3.33 ± 0.527 species for the urban center. 
 
 ```{r stats_graphs_spec, echo = FALSE}
 spec <- glm(spec_rad ~ Location, family = "poisson", data = sites)
@@ -793,7 +793,7 @@ ggarrange(resid_spec, qq_spec,
           ncol = 2, nrow = 1)
 ```
 
-Spectral radiance is **significantly higher in the urban center** than the urban forest (z = 3.079, df = 1, 20, p = 0.002). The means and SE's are 137.44 ± 3.71 Watts/(m² * sr * µm) for the urban forest and 153.39 ± 3.58 Watts/(m² * sr * µm) for the urban center. 
+Spectral radiance is **significantly higher in the urban center** than the urban forest (z = 3.079, df = 1, 21, p = 0.002). The means and SE's are 137.44 ± 3.71 Watts/(m² * sr * µm) for the urban forest and 153.39 ± 3.58 Watts/(m² * sr * µm) for the urban center. 
 
 ```{r stats_graphs_light, echo = FALSE}
 light <- glm(light_rad ~ Location, family = "poisson", data = sites)
@@ -860,26 +860,26 @@ ggarrange(resid_light, qq_light,
           ncol = 2, nrow = 1)
 ```
 
-Light radiance is **significantly higher in the urban center** than the urban forest (z = 22.46, df = 1, 20, p < 0.001). The means and SE's are 5.89 ± 0.77 mcd/m² for the urban forest and 116.90 ± 3.12 mcd/m² for the urban center.
+Light radiance is **significantly higher in the urban center** than the urban forest (z = 22.46, df = 1, 21, p < 0.001). The means and SE's are 5.89 ± 0.77 mcd/m² for the urban forest and 116.90 ± 3.12 mcd/m² for the urban center.
 
 ```{r stats_graphs_patch, echo = FALSE}
-patch <- glm(log_patch ~ Location, family = "poisson", data = sites)
+patch <- glm(patch_area_mm ~ Location, family = "poisson", data = sites)
 summary(patch)
 
 sites %>% 
   group_by(Location) %>% 
-  summarize(mean = mean(log_patch),
-            se = plotrix::std.error(log_patch))
+  summarize(mean = mean(patch_area_mm),
+            se = plotrix::std.error(patch_area_mm))
 
 predictions <- summary(emmeans(patch, ~Location),type = "response")
 predictions 
 
-ggplot(sites, aes(x = Location, y = exp(log_patch))) + 
+ggplot(sites, aes(x = Location, y = (patch_area_mm))) + 
   geom_jitter(color = "grey", width = 0.1, size = 1) +
-  geom_point(aes(x = Location, y = exp(rate), color = Location), size = 2, data = predictions) + 
+  geom_point(aes(x = Location, y = (rate), color = Location), size = 2, data = predictions) + 
   geom_errorbar(aes(x = Location, 
-                  ymin = exp(rate - SE), 
-                  ymax = exp(rate + SE),
+                  ymin = (rate - SE), 
+                  ymax = (rate + SE),
                   color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, linewidth = 1.5) +
   scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
   scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
@@ -927,7 +927,7 @@ ggarrange(resid_patch, qq_patch,
           ncol = 2, nrow = 1)
 ```
 
-Patch area is **significantly higher in the urban forest** than the urban center (z = -3.599, df = 1, 20, p < 0.001). The means and SE's are `r exp(10.52)` ± `r exp(1.026)` mm² for the urban forest and `r exp(6.08)` ± `r exp(0.712)` mm² for the urban center. 
+Patch area is **significantly higher in the urban forest** than the urban center (z = -374.2, df = 1, 21, p < 0.001). The means and SE's are 46,294.7 ± 68.040 mm² for the urban forest and 653.8 ± 7.381 mm² for the urban center. 
 
 ```{r stats_graphs_road, echo = FALSE}
 road <- glm(road_length_m ~ Location, family = "poisson", data = sites)
@@ -994,7 +994,7 @@ ggarrange(resid_road, qq_road,
           ncol = 2, nrow = 1)
 ```
 
-Total road length is **significantly higher in the urban center** than the urban forest (z = 20.89, df = 1, 20, p < 0.001). The means and SE's are 15.67 ± 1.25 m for the urban forest and 93.03 ± 2.78 m for the urban center. 
+Total road length is **significantly higher in the urban center** than the urban forest (z = 20.89, df = 1, 21, p < 0.001). The means and SE's are 15.67 ± 1.25 m for the urban forest and 93.03 ± 2.78 m for the urban center. 
 
 ## Response Variable: Search Distance
 
@@ -3755,7 +3755,7 @@ dist_forest_tree <- ggplot(near_forest, aes(x = (tree100m), y = log(RetreatDist)
             size = 1, 
             color = colorf, 
             data = predicted.distance) + 
-  geom_ribbon(aes(x = log(tree100m), 
+  geom_ribbon(aes(x = (tree100m), 
                   ymin = .fitted - 1.96 * .se.fit, 
                   ymax = .fitted + 1.96 * .se.fit), 
               fill = colorf, 
@@ -4678,8 +4678,8 @@ flextable(land_cover[ ,1:4]) %>%
 ### Predictors by Location
 
 ```{r pred_location, fig.width = 6.85, dpi = 300}
-mean_se1 <- c("Mean ± Std. Error", "Wilderness Park \nUrban Forest", "47.15 ± 2.17", "1.27 ± 0.36", "137.44 ± 3.71", "5.89 ± 0.77", "12.18 ± 1.65", "37,049.12 ± 2.79", "52.98 ± 1.88", "33.78 ± 1.81", "15.67 ± 1.25")
-mean_se2 <- c("Mean ± Std. Error", "UNL City Campus \n Urban Center", "1.58 ± 0.36", "76.52 ± 2.53", "153.39 ± 3.58", "116.90 ± 3.12", "2.97 ± 1.35", "437.03 ± 2.04", "194.42 ± 1.94", "52.46 ± 1.78", "93.03 ± 2.78")
+mean_se1 <- c("Mean ± Std. Error", "Wilderness Park \nUrban Forest", "47.15 ± 2.17", "1.27 ± 0.36", "137.44 ± 3.71", "5.89 ± 0.77", "13.30 ± 1.15", "46,294.7 ± 68.040", "104 ± 3.23", "35.6 ± 1.89", "15.67 ± 1.25")
+mean_se2 <- c("Mean ± Std. Error", "UNL City Campus \n Urban Center", "1.58 ± 0.36", "76.52 ± 2.53", "153.39 ± 3.58", "116.90 ± 3.12", "3.33 ± 0.53", "116.90 ± 3.12", "398 ± 5.76", "65.0 ± 2.33", "93.03 ± 2.78")
 pred_location <- data.frame(mean_se1, mean_se2)
 rownames(pred_location) <- c("", " ", "Percent Tree Cover [%]", "Percent Impervious Cover [%]", "Spectral Radiance [Watts/(m² * sr * µm)]", "Artificial Night Sky Radiance [mcd/m²]", "Plant Species Richness", "Patch Area [m²]", "Road Disturbance [vehicles/day/m]", "Highway Disturbance [vehicles/day/m]", "Total Road Length [m]")
 names <- rownames(pred_location)
