@@ -2247,18 +2247,20 @@ webs_plant <- ggplot(sites, aes(x = log_TotalSub, y = log(NumWebs))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites$NumWebs)), max(log(sites$NumWebs)) + 0.1 * diff(range(log(sites$NumWebs))))) +  
+#  scale_y_continuous(limits = c(min(log(sites$NumWebs)), max(log(sites$NumWebs)) + 0.1 * diff(range(log(sites$NumWebs))))) +  
+  scale_y_continuous(limits = c(-1.2, 5), breaks = c(-1, 0, 1, 2, 3, 4, 5)) +  
   theme_classic() +
   xlab("Plant Species Richness [log()]") +
   ylab("Number of Webs [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(sites$NumWebs)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        axis.text.x = element_blank()) + 
+#  theme(axis.text.y = element_blank()) +
+#  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(sites$NumWebs)), label = "***", color = "black", size = 4) +
+  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = 4.8, label = "***", color = "black", size = 4)
 
 # Road Disturbance
 nd <- data.frame(log_TotalSub = mean(sites$log_TotalSub), 
@@ -2281,18 +2283,20 @@ webs_tdr <- ggplot(sites, aes(x = log_tdr, y = log(NumWebs))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites$NumWebs)), max(log(sites$NumWebs)) + 0.1 * diff(range(log(sites$NumWebs))))) +  
+#  scale_y_continuous(limits = c(min(log(sites$NumWebs)), max(log(sites$NumWebs)) + 0.1 * diff(range(log(sites$NumWebs))))) +  
+  scale_y_continuous(limits = c(-1.2, 5), breaks = c(-1, 0, 1, 2, 3, 4, 5)) +  
   theme_classic() +
   xlab("Road Disturbance [log(vehicles/day/m)]") +
   ylab("Number of Webs [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_tdr)) + diff(range((predicted.distance$log_tdr)))/2, y = max(log(sites$NumWebs)), label = "***", color = "black", size = 4)
+        axis.text.x = element_blank()) + 
+#  annotate(geom = "text", x = min((predicted.distance$log_tdr)) + diff(range((predicted.distance$log_tdr)))/2, y = max(log(sites$NumWebs)), label = "***", color = "black", size = 4) +
+    annotate(geom = "text", x = min((predicted.distance$log_tdr)) + diff(range((predicted.distance$log_tdr)))/2, y = 4.8, label = "***", color = "black", size = 4)
 
 # Highway Disturbance
 nd <- data.frame(log_TotalSub = mean(sites$log_TotalSub), 
@@ -2315,18 +2319,20 @@ webs_tdh <- ggplot(sites, aes(x = log_tdh, y = log(NumWebs))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites$NumWebs)) - 1.2, max(log(sites$NumWebs)) + 0.1 * diff(range(log(sites$NumWebs))))) +  
+#  scale_y_continuous(limits = c(min(log(sites$NumWebs)) - 1.2, max(log(sites$NumWebs)) + 0.1 * diff(range(log(sites$NumWebs))))) +  
+  scale_y_continuous(limits = c(-1.2, 5), breaks = c(-1, 0, 1, 2, 3, 4, 5)) +  
   theme_classic() +
   xlab("Highway Disturbance [log(vehicles/day/m)]") +
   ylab("Number of Webs [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(sites$NumWebs)), label = "***", color = "black", size = 4)
+        axis.text.x = element_blank()) + 
+#  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(sites$NumWebs)), label = "***", color = "black", size = 4) +
+  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = 4.8, label = "***", color = "black", size = 4)
 
 webs_plant
 webs_tdr
@@ -2360,18 +2366,20 @@ webs_center_plant <- ggplot(sites_center, aes(x = log_TotalSub, y = log(NumWebs)
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites_center$NumWebs)), max(log(sites_center$NumWebs)) + 0.1 * diff(range(log(sites_center$NumWebs))))) +  
+#  scale_y_continuous(limits = c(min(log(sites_center$NumWebs)), max(log(sites_center$NumWebs)) + 0.1 * diff(range(log(sites_center$NumWebs))))) +  
+  scale_y_continuous(limits = c(-1.2, 5), breaks = c(-1, 0, 1, 2, 3, 4, 5)) +
   theme_classic() +
   xlab("Plant Species Richness [log()]") +
   ylab("Number of Webs [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_TotalSub)) + diff(range((predicted.distance$log_TotalSub)))/2, y = max(log(sites_center$NumWebs)), label = "***", color = "black", size = 4) 
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.x = element_blank()) + 
+#  theme(axis.text.y = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$log_TotalSub)) + diff(range((predicted.distance$log_TotalSub)))/2, y = max(log(sites_center$NumWebs)), label = "***", color = "black", size = 4) +
+  annotate(geom = "text", x = min((predicted.distance$log_TotalSub)) + diff(range((predicted.distance$log_TotalSub)))/2, y = 5, label = "***", color = "black", size = 4) 
 
 # Patch Area
 nd <- data.frame(log_TotalSub = mean(sites_center$log_TotalSub), 
@@ -2395,18 +2403,20 @@ webs_center_patch <- ggplot(sites_center, aes(x = log_patch, y = log(NumWebs))) 
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites_center$NumWebs)) - 0.75, max(log(sites_center$NumWebs)) + 0.15 * diff(range(log(sites_center$NumWebs))))) +  
+#  scale_y_continuous(limits = c(min(log(sites_center$NumWebs)) - 0.75, max(log(sites_center$NumWebs)) + 0.15 * diff(range(log(sites_center$NumWebs))))) +  
+  scale_y_continuous(limits = c(-1.2, 5), breaks = c(-1, 0, 1, 2, 3, 4, 5)) +
   theme_classic() +
   xlab("Patch Area [log(mm²)]") +
   ylab("Number of Webs [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_patch)) + diff(range((predicted.distance$log_patch)))/2, y = max(log(sites_center$NumWebs)), label = "**", color = "black", size = 4) 
+        axis.text.x = element_blank()) + 
+#  annotate(geom = "text", x = min((predicted.distance$log_patch)) + diff(range((predicted.distance$log_patch)))/2, y = max(log(sites_center$NumWebs)), label = "**", color = "black", size = 4) +
+    annotate(geom = "text", x = min((predicted.distance$log_patch)) + diff(range((predicted.distance$log_patch)))/2, y = 5, label = "**", color = "black", size = 4) 
 
 # Highway Disturbance
 nd <- data.frame(log_TotalSub = mean(sites_center$log_TotalSub), 
@@ -2430,18 +2440,20 @@ webs_center_tdh <- ggplot(sites_center, aes(x = log_tdh, y = log(NumWebs))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites_center$NumWebs)) - 0.75, max(log(sites_center$NumWebs)) + 0.1 * diff(range(log(sites_center$NumWebs))))) +  
+#  scale_y_continuous(limits = c(min(log(sites_center$NumWebs)) - 0.75, max(log(sites_center$NumWebs)) + 0.1 * diff(range(log(sites_center$NumWebs))))) +  
+  scale_y_continuous(limits = c(-1.2, 5), breaks = c(-1, 0, 1, 2, 3, 4, 5)) +
   theme_classic() +
   xlab("Highway Disturbance [log(vehicles/day/m)]") +
   ylab("Number of Webs [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(sites_center$NumWebs)), label = "***", color = "black", size = 4) 
+        axis.text.x = element_blank()) + 
+#  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(sites_center$NumWebs)), label = "***", color = "black", size = 4) +
+  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = 5, label = "***", color = "black", size = 4) 
 
 # Road Length
 nd <- data.frame(log_TotalSub = mean(sites_center$log_TotalSub), 
@@ -2465,18 +2477,20 @@ webs_center_road <- ggplot(sites_center, aes(x = (road_length_m), y = log(NumWeb
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites_center$NumWebs)), max(log(sites_center$NumWebs)) + 0.1 * diff(range(log(sites_center$NumWebs))))) +  
+#  scale_y_continuous(limits = c(min(log(sites_center$NumWebs)), max(log(sites_center$NumWebs)) + 0.1 * diff(range(log(sites_center$NumWebs))))) +
+  scale_y_continuous(limits = c(-1.2, 5), breaks = c(-1, 0, 1, 2, 3, 4, 5)) +
   theme_classic() +
   xlab("Total Road Length [m]") +
   ylab("Number of Webs [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$road_length_m)) + diff(range((predicted.distance$road_length_m)))/2, y = max(log(sites_center$NumWebs)), label = "***", color = "black", size = 4) 
+        axis.text.x = element_blank()) + 
+#  annotate(geom = "text", x = min((predicted.distance$road_length_m)) + diff(range((predicted.distance$road_length_m)))/2, y = max(log(sites_center$NumWebs)), label = "***", color = "black", size = 4) +
+  annotate(geom = "text", x = min((predicted.distance$road_length_m)) + diff(range((predicted.distance$road_length_m)))/2, y = 5, label = "***", color = "black", size = 4) 
 
 webs_center_plant
 webs_center_patch
@@ -2895,18 +2909,20 @@ spiders_plant <- ggplot(sites, aes(x = log_TotalSub, y = log(NumSpiders))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites$NumSpiders)) - 2, max(log(sites$NumSpiders)) + 0.1 * diff(range(log(sites$NumSpiders))))) +  
+#  scale_y_continuous(limits = c(min(log(sites$NumSpiders)) - 2, max(log(sites$NumSpiders)) + 0.1 * diff(range(log(sites$NumSpiders))))) +  
+  scale_y_continuous(limits = c(-2, 3.3), breaks = c(-2, -1, 0, 1, 2, 3)) +  
   theme_classic() +
   xlab("Plant Species Richness [log()]") +
   ylab("Number of Spiders [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(sites$NumSpiders)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        axis.text.x = element_blank()) + 
+#  theme(axis.text.y = element_blank()) +
+#  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(sites$NumSpiders)), label = "***", color = "black", size = 4)
+    annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = 3, label = "***", color = "black", size = 4)
 
 # Highway Disturbance
 nd <- data.frame(log_TotalSub = mean(sites$log_TotalSub), 
@@ -2928,18 +2944,20 @@ spiders_tdh <- ggplot(sites, aes(x = log_tdh, y = log(NumSpiders))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites$NumSpiders)) - 2, max(log(sites$NumSpiders)) + 0.1 * diff(range(log(sites$NumSpiders))))) +  
+#  scale_y_continuous(limits = c(min(log(sites$NumSpiders)) - 2, max(log(sites$NumSpiders)) + 0.1 * diff(range(log(sites$NumSpiders))))) +  
+  scale_y_continuous(limits = c(-2, 3.3), breaks = c(-2, -1, 0, 1, 2, 3)) +  
   theme_classic() +
   xlab("Highway Disturbance [log(vehicles/day/m)]") +
   ylab("Number of Spiders [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(sites$NumSpiders)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(sites$NumSpiders)), label = "***", color = "black", size = 4)
+  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = 3, label = "***", color = "black", size = 4)
 
 spiders_plant
 spiders_tdh
@@ -2972,18 +2990,20 @@ spiders_center_plant <- ggplot(sites_center, aes(x = log_TotalSub, y = log(NumSp
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites_center$NumSpiders)) - 1, max(log(sites_center$NumSpiders)) + 0.2 * diff(range(log(sites_center$NumSpiders))))) +  
+#  scale_y_continuous(limits = c(min(log(sites_center$NumSpiders)) - 1, max(log(sites_center$NumSpiders)) + 0.2 * diff(range(log(sites_center$NumSpiders))))) +  
+  scale_y_continuous(limits = c(-2, 3.5), breaks = c(-2, -1, 0, 1, 2, 3)) +  
   theme_classic() +
   xlab("Plant Species Richness [log()]") +
   ylab("Number of Spiders [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_TotalSub)) + diff(range((predicted.distance$log_TotalSub)))/2, y = max(log(sites_center$NumSpiders)), label = "***", color = "black", size = 4) 
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank()) + 
+#  theme(axis.text.x = element_blank(), 
+#        axis.text.y = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$log_TotalSub)) + diff(range((predicted.distance$log_TotalSub)))/2, y = max(log(sites_center$NumSpiders)), label = "***", color = "black", size = 4) 
+  annotate(geom = "text", x = min((predicted.distance$log_TotalSub)) + diff(range((predicted.distance$log_TotalSub)))/2, y = 3.5, label = "***", color = "black", size = 4) 
 
 # Patch Area
 nd <- data.frame(log_TotalSub = mean(sites_center$log_TotalSub), 
@@ -3007,18 +3027,20 @@ spiders_center_patch <- ggplot(sites_center, aes(x = log_patch, y = log(NumSpide
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites_center$NumSpiders)) - 1, max(log(sites_center$NumSpiders)) + 0.15 * diff(range(log(sites_center$NumSpiders))))) +  
+#  scale_y_continuous(limits = c(min(log(sites_center$NumSpiders)) - 1, max(log(sites_center$NumSpiders)) + 0.15 * diff(range(log(sites_center$NumSpiders))))) +  
+  scale_y_continuous(limits = c(-2, 3.5), breaks = c(-2, -1, 0, 1, 2, 3)) +  
   theme_classic() +
   xlab("Patch Area [log(mm²)]") +
   ylab("Number of Spiders [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_patch)) + diff(range((predicted.distance$log_patch)))/2, y = max(log(sites_center$NumSpiders)), label = "**", color = "black", size = 4) 
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$log_patch)) + diff(range((predicted.distance$log_patch)))/2, y = max(log(sites_center$NumSpiders)), label = "**", color = "black", size = 4) 
+  annotate(geom = "text", x = min((predicted.distance$log_patch)) + diff(range((predicted.distance$log_patch)))/2, y = 3.5, label = "**", color = "black", size = 4) 
 
 # Highway Disturbance
 nd <- data.frame(log_TotalSub = mean(sites_center$log_TotalSub), 
@@ -3042,18 +3064,20 @@ spiders_center_tdh <- ggplot(sites_center, aes(x = log_tdh, y = log(NumSpiders))
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites_center$NumSpiders)) - 2, max(log(sites_center$NumSpiders)) + 0.1 * diff(range(log(sites_center$NumSpiders))))) +  
+#  scale_y_continuous(limits = c(min(log(sites_center$NumSpiders)) - 2, max(log(sites_center$NumSpiders)) + 0.1 * diff(range(log(sites_center$NumSpiders))))) +  
+  scale_y_continuous(limits = c(-2, 3.5), breaks = c(-2, -1, 0, 1, 2, 3)) +  
   theme_classic() +
   xlab("Highway Disturbance [log(vehicles/day/m)]") +
   ylab("Number of Spiders [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(sites_center$NumSpiders)), label = "***", color = "black", size = 4) 
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(sites_center$NumSpiders)), label = "***", color = "black", size = 4) 
+  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = 3.5, label = "***", color = "black", size = 4) 
 
 # Road Length
 nd <- data.frame(log_TotalSub = mean(sites_center$log_TotalSub), 
@@ -3077,18 +3101,20 @@ spiders_center_road <- ggplot(sites_center, aes(x = (road_length_m), y = log(Num
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(sites_center$NumSpiders)) - 1, max(log(sites_center$NumSpiders)) + 0.1 * diff(range(log(sites_center$NumSpiders))))) +  
+#  scale_y_continuous(limits = c(min(log(sites_center$NumSpiders)) - 1, max(log(sites_center$NumSpiders)) + 0.1 * diff(range(log(sites_center$NumSpiders))))) +  
+  scale_y_continuous(limits = c(-2, 3.5), breaks = c(-2, -1, 0, 1, 2, 3)) +  
   theme_classic() +
   xlab("Total Road Length [m]") +
   ylab("Number of Spiders [log()]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$road_length_m)) + diff(range((predicted.distance$road_length_m)))/2, y = max(log(sites_center$NumSpiders)), label = "***", color = "black", size = 4) 
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$road_length_m)) + diff(range((predicted.distance$road_length_m)))/2, y = max(log(sites_center$NumSpiders)), label = "***", color = "black", size = 4) 
+  annotate(geom = "text", x = min((predicted.distance$road_length_m)) + diff(range((predicted.distance$road_length_m)))/2, y = 3.5, label = "***", color = "black", size = 4) 
 
 spiders_center_plant
 spiders_center_patch
@@ -3580,18 +3606,20 @@ dist_plant <- ggplot(near, aes(x = log_TotalSub, y = log(RetreatDist))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(near$RetreatDist)), max(log(near$RetreatDist)) + 0.1 * diff(range(log(near$RetreatDist))))) +  
+#  scale_y_continuous(limits = c(min(log(near$RetreatDist)), max(log(near$RetreatDist)) + 0.1 * diff(range(log(near$RetreatDist))))) +  
+  scale_y_continuous(limits = c(2, 7), breaks = c(2, 3, 4, 5, 6, 7)) +  
   theme_classic() +
   xlab("Plant Species Richness [log()]") +
   ylab("Distance from Focal Web \nto Neighbor Web [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(near$RetreatDist)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        axis.text.x = element_blank()) + 
+#  theme(axis.text.y = element_blank()) +
+#  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(near$RetreatDist)), label = "***", color = "black", size = 4)
+  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = 6.8, label = "***", color = "black", size = 4)
 
 # Road Disturbance
 nd <- data.frame(log_TotalSub = mean(near$log_TotalSub), 
@@ -3613,18 +3641,20 @@ dist_tdr <- ggplot(near, aes(x = log_tdr, y = log(RetreatDist))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(near$RetreatDist)), max(log(near$RetreatDist)) + 0.1 * diff(range(log(near$RetreatDist))))) +  
+#  scale_y_continuous(limits = c(min(log(near$RetreatDist)), max(log(near$RetreatDist)) + 0.1 * diff(range(log(near$RetreatDist))))) + 
+  scale_y_continuous(limits = c(2, 7), breaks = c(2, 3, 4, 5, 6, 7)) +  
   theme_classic() +
   xlab("Road Disturbance [log(vehicles/day/m)]") +
   ylab("Distance from Focal Web \nto Neighbor Web [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
         axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_tdr)) + diff(range((predicted.distance$log_tdr)))/2, y = max(log(near$RetreatDist)), label = "***", color = "black", size = 4)
+        axis.text.x = element_blank()) + 
+#  annotate(geom = "text", x = min((predicted.distance$log_tdr)) + diff(range((predicted.distance$log_tdr)))/2, y = max(log(near$RetreatDist)), label = "***", color = "black", size = 4)
+    annotate(geom = "text", x = min((predicted.distance$log_tdr)) + diff(range((predicted.distance$log_tdr)))/2, y =6.8, label = "***", color = "black", size = 4)
 
 dist_plant
 dist_tdr
@@ -3657,18 +3687,20 @@ dist_forest_plant <- ggplot(near_forest, aes(x = log_TotalSub, y = log(RetreatDi
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(near_forest$RetreatDist)), max(log(near_forest$RetreatDist)) + 0.1 * diff(range(log(near_forest$RetreatDist))))) +  
+#  scale_y_continuous(limits = c(min(log(near_forest$RetreatDist)), max(log(near_forest$RetreatDist)) + 0.1 * diff(range(log(near_forest$RetreatDist))))) +  
+  scale_y_continuous(limits = c(4, 7), breaks = c(4, 5, 6, 7)) +  
   theme_classic() +
   xlab("Plant Species Richness [log()]") +
   ylab("Distance from Focal Web \nto Neighbor Web [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(near_forest$RetreatDist)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank()) + 
+#  theme(axis.text.x = element_blank(), 
+#        axis.text.y = element_blank()) +
+#  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(near_forest$RetreatDist)), label = "***", color = "black", size = 4)
+  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = 7, label = "***", color = "black", size = 4)
 
 # Highway Disturbance
 nd <- data.frame(log_TotalSub = mean(near_forest$log_TotalSub), 
@@ -3692,18 +3724,20 @@ dist_forest_tdh <- ggplot(near_forest, aes(x = log_tdh, y = log(RetreatDist))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(near_forest$RetreatDist)), max(log(near_forest$RetreatDist)) + 0.1 * diff(range(log(near_forest$RetreatDist))))) +  
+#  scale_y_continuous(limits = c(min(log(near_forest$RetreatDist)), max(log(near_forest$RetreatDist)) + 0.1 * diff(range(log(near_forest$RetreatDist))))) +  
+  scale_y_continuous(limits = c(4, 7), breaks = c(4, 5, 6, 7)) +  
   theme_classic() +
   xlab("Highway Disturbance [log(vehicles/day/m)]") +
   ylab("Distance from Focal Web \nto Neighbor Web [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(near_forest$RetreatDist)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = max(log(near_forest$RetreatDist)), label = "***", color = "black", size = 4)
+  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = 7, label = "***", color = "black", size = 4)
 
 # Road Disturbance
 nd <- data.frame(log_TotalSub = mean(near_forest$log_TotalSub), 
@@ -3727,18 +3761,20 @@ dist_forest_tdr <- ggplot(near_forest, aes(x = log_tdr, y = log(RetreatDist))) +
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(near_forest$RetreatDist)), max(log(near_forest$RetreatDist)) + 0.1 * diff(range(log(near_forest$RetreatDist))))) +  
+#  scale_y_continuous(limits = c(min(log(near_forest$RetreatDist)), max(log(near_forest$RetreatDist)) + 0.1 * diff(range(log(near_forest$RetreatDist))))) +  
+  scale_y_continuous(limits = c(4, 7), breaks = c(4, 5, 6, 7)) +  
   theme_classic() +
   xlab("Road Disturbance [log(vehicles/day/m)]") +
   ylab("Distance from Focal Web \nto Neighbor Web [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$log_tdr)) + diff(range((predicted.distance$log_tdr)))/2, y = max(log(near_forest$RetreatDist)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$log_tdr)) + diff(range((predicted.distance$log_tdr)))/2, y = max(log(near_forest$RetreatDist)), label = "***", color = "black", size = 4)
+  annotate(geom = "text", x = min((predicted.distance$log_tdr)) + diff(range((predicted.distance$log_tdr)))/2, y = 7, label = "***", color = "black", size = 4)
 
 # Tree
 nd <- data.frame(log_TotalSub = mean(near_forest$log_TotalSub), 
@@ -3762,18 +3798,20 @@ dist_forest_tree <- ggplot(near_forest, aes(x = (tree100m), y = log(RetreatDist)
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(near_forest$RetreatDist)), max(log(near_forest$RetreatDist)) + 0.1 * diff(range(log(near_forest$RetreatDist))))) +  
+#  scale_y_continuous(limits = c(min(log(near_forest$RetreatDist)), max(log(near_forest$RetreatDist)) + 0.1 * diff(range(log(near_forest$RetreatDist))))) +  
+  scale_y_continuous(limits = c(4, 7), breaks = c(4, 5, 6, 7)) +  
   theme_classic() +
   xlab("Percent Tree Cover [%]") +
   ylab("Distance from Focal Web \nto Neighbor Web [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$tree100m)) + diff(range((predicted.distance$tree100m)))/2, y = max(log(near_forest$RetreatDist)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$tree100m)) + diff(range((predicted.distance$tree100m)))/2, y = max(log(near_forest$RetreatDist)), label = "***", color = "black", size = 4)
+  annotate(geom = "text", x = min((predicted.distance$tree100m)) + diff(range((predicted.distance$tree100m)))/2, y = 7, label = "***", color = "black", size = 4)
 
 dist_forest_plant
 dist_forest_tdr
@@ -3807,18 +3845,20 @@ dist_center_plant <- ggplot(near_center, aes(x = log_TotalSub, y = log(RetreatDi
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(near_center$RetreatDist)), max(log(near_center$RetreatDist)) + 0.1 * diff(range(log(near_center$RetreatDist))))) +  
+#  scale_y_continuous(limits = c(min(log(near_center$RetreatDist)), max(log(near_center$RetreatDist)) + 0.1 * diff(range(log(near_center$RetreatDist))))) +  
+  scale_y_continuous(limits = c(2, 7), breaks = c(2, 3, 4, 5, 6, 7)) +  
   theme_classic() +
   xlab("Plant Species Richness [log()]") +
   ylab("Distance from Focal Web \nto Neighbor Web [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(near_center$RetreatDist)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank()) + 
+#  theme(axis.text.x = element_blank(), 
+#        axis.text.y = element_blank()) +
+#  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = max(log(near_center$RetreatDist)), label = "***", color = "black", size = 4)
+  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = 7, label = "***", color = "black", size = 4)
 
 # Spectral Radiance
 nd <- data.frame(log_TotalSub = mean(near_center$log_TotalSub), 
@@ -3841,18 +3881,20 @@ dist_center_spec <- ggplot(near_center, aes(x = (spec_rad), y = log(RetreatDist)
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(near_center$RetreatDist)), max(log(near_center$RetreatDist)) + 0.1 * diff(range(log(near_center$RetreatDist))))) +  
+#  scale_y_continuous(limits = c(min(log(near_center$RetreatDist)), max(log(near_center$RetreatDist)) + 0.1 * diff(range(log(near_center$RetreatDist))))) +  
+  scale_y_continuous(limits = c(2, 7), breaks = c(2, 3, 4, 5, 6, 7)) +  
   theme_classic() +
   xlab("Spectral Radiance \n[Watts/(m² * sr * µm)]") + 
   ylab("Distance from Focal Web \nto Neighbor Web [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$spec_rad)) + diff(range((predicted.distance$spec_rad)))/2, y = max(log(near_center$RetreatDist)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$spec_rad)) + diff(range((predicted.distance$spec_rad)))/2, y = max(log(near_center$RetreatDist)), label = "***", color = "black", size = 4)
+  annotate(geom = "text", x = min((predicted.distance$spec_rad)) + diff(range((predicted.distance$spec_rad)))/2, y = 7, label = "***", color = "black", size = 4)
 
 # Road Length
 nd <- data.frame(log_TotalSub = mean(near_center$log_TotalSub), 
@@ -3875,18 +3917,20 @@ dist_center_road <- ggplot(near_center, aes(x = (road_length_m), y = log(Retreat
               data = predicted.distance, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(near_center$RetreatDist)), max(log(near_center$RetreatDist)) + 0.1 * diff(range(log(near_center$RetreatDist))))) +  
+#  scale_y_continuous(limits = c(min(log(near_center$RetreatDist)), max(log(near_center$RetreatDist)) + 0.1 * diff(range(log(near_center$RetreatDist))))) +  
+  scale_y_continuous(limits = c(2, 7), breaks = c(2, 3, 4, 5, 6, 7)) +  
   theme_classic() +
   xlab("Total Road Length [m]") +
   ylab("Distance from Focal Web \nto Neighbor Web [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min((predicted.distance$road_length_m)) + diff(range((predicted.distance$road_length_m)))/2, y = max(log(near_center$RetreatDist)), label = "***", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min((predicted.distance$road_length_m)) + diff(range((predicted.distance$road_length_m)))/2, y = max(log(near_center$RetreatDist)), label = "***", color = "black", size = 4)
+  annotate(geom = "text", x = min((predicted.distance$road_length_m)) + diff(range((predicted.distance$road_length_m)))/2, y = 7, label = "***", color = "black", size = 4)
 
 dist_center_plant
 dist_center_spec
@@ -4378,18 +4422,20 @@ height_plant <- ggplot(webs, aes(x = log_TotalSub, y = log(RetreatHeight))) +
               data = predictions, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(webs$RetreatHeight)), max(log(webs$RetreatHeight)) + 0.1 * diff(range(log(webs$RetreatHeight))))) +  
+#  scale_y_continuous(limits = c(min(log(webs$RetreatHeight)), max(log(webs$RetreatHeight)) + 0.1 * diff(range(log(webs$RetreatHeight))))) +  
+  scale_y_continuous(limits = c(-2.5, 6), breaks = c(-2, 0, 2, 4, 6)) +  
   theme_classic() +
   xlab("Plant Species Richness [log()]") +
   ylab("Web Height [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min(predictions$log_TotalSub) + diff(range(predictions$log_TotalSub))/2, y = max(log(webs$RetreatHeight)), label = "**", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank()) + 
+#  theme(axis.text.x = element_blank(), 
+#        axis.text.y = element_blank()) +
+#  annotate(geom = "text", x = min(predictions$log_TotalSub) + diff(range(predictions$log_TotalSub))/2, y = max(log(webs$RetreatHeight)), label = "**", color = "black", size = 4)
+    annotate(geom = "text", x = min(predictions$log_TotalSub) + diff(range(predictions$log_TotalSub))/2, y = 5.8, label = "**", color = "black", size = 4)
 
 # Road Disturbance
 predictions <- expand.grid(log_TotalSub = mean(webs$log_TotalSub),
@@ -4419,18 +4465,20 @@ height_tdr <- ggplot(webs, aes(x = log_tdr, y = log(RetreatHeight))) +
               data = predictions, 
               inherit.aes = FALSE, 
               alpha = 0.25) +
-  scale_y_continuous(limits = c(min(log(webs$RetreatHeight)), max(log(webs$RetreatHeight)) + 0.1 * diff(range(log(webs$RetreatHeight))))) +  
+#  scale_y_continuous(limits = c(min(log(webs$RetreatHeight)), max(log(webs$RetreatHeight)) + 0.1 * diff(range(log(webs$RetreatHeight))))) +  
+  scale_y_continuous(limits = c(-2.5, 6), breaks = c(-2, 0, 2, 4, 6)) +  
   theme_classic() +
   xlab("Road Disturbance [log(vehicles/day/m)]") +
   ylab("Web Height [log(cm)]") + 
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
-  annotate(geom = "text", x = min(predictions$log_tdr) + diff(range(predictions$log_tdr))/2, y = max(log(webs$RetreatHeight)), label = "N. S.", color = "black", size = 4)
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        axis.text.y = element_blank()) + 
+#  theme(axis.text.x = element_blank()) +
+#  annotate(geom = "text", x = min(predictions$log_tdr) + diff(range(predictions$log_tdr))/2, y = max(log(webs$RetreatHeight)), label = "N. S.", color = "black", size = 4)
+    annotate(geom = "text", x = min(predictions$log_tdr) + diff(range(predictions$log_tdr))/2, y = 5.8, label = "N. S.", color = "black", size = 4)
 
 height_plant
 height_tdr
@@ -4475,10 +4523,10 @@ height_forest_tree <- ggplot(webs_forest, aes(x = log(tree100m_frac), y = log(Re
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank()) + 
+#  theme(axis.text.x = element_blank(), 
+#        axis.text.y = element_blank()) +
   annotate(geom = "text", x = min(log(predictions$tree100m_frac)) + diff(range(log(predictions$tree100m_frac)))/2, y = max(log(webs_forest$RetreatHeight)), label = "**", color = "black", size = 4)
 
 height_forest_tree
@@ -4523,10 +4571,10 @@ height_center_plant <- ggplot(webs_center, aes(x = log_TotalSub, y = log(Retreat
   theme(text = element_text(size = 10)) + 
   theme(axis.text.x = element_text(colour = "black", size = 10)) + 
   theme(axis.text.y = element_text(colour = "black", size = 10)) +
-  theme(axis.text.x = element_blank(), 
-        axis.title.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.title.y = element_blank()) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank()) + 
+#  theme(axis.text.x = element_blank(), 
+#        axis.text.y = element_blank()) +
   annotate(geom = "text", x = min((predictions$log_TotalSub)) + diff(range((predictions$log_TotalSub)))/2, y = max(log(webs_forest$RetreatHeight)), label = "N.S.", color = "black", size = 4)
 
 height_center_plant
@@ -4936,4 +4984,33 @@ flextable(land_stats[ , 1:4]) %>%
   valign(valign = "top", part = "all") %>% 
   set_caption("") %>% 
   save_as_image(path = here::here("manuscript/figures/land_stats.png"))
+```
+
+## Lit Review Table
+
+```{r references}
+mech <- c("Mechanisms of Aggregation", "Interspecific and Intraspecific Interactions", "Interspecific and Intraspecific Interactions", "Interspecific and Intraspecific Interactions", "Interspecific and Intraspecific Interactions", "Interspecific and Intraspecific Interactions", "Interspecific and Intraspecific Interactions", "Environmental Factors", "Environmental Factors", "Environmental Factors", "Dispersal", "Dispersal")
+
+mech2 <- c("Mechanisms of Aggregation", "Conspecific Attraction", "Lekking for Mates", "Heterospecific Attraction", "Predation Release", "Prey Chemical Cues", "Prey Abundance", "Light Cues", "Plant Cover", "Limited Shelter from Thermal Stress", "Limited Dispersal via Flooding", "Ontogenesis")
+
+rel <- c("Relationship with Spider Aggregation", "Following conspecific silk increased aggregation tendencies", "Larger female aggregations attract more males", "Spiders aggregate around heterospecific spiders", "Predation reduced when aggregated", "Spiders preferred areas with prey chemical cues", "Spider aggregations were denser in areas with more available prey", "Spiders were attracted to and gathered in areas with artificial light", "Spiders aggregated in an area dominated by cover of a specific plant", "Aggregations on  limited protective structures against high temperatures", "Flooding restricted ballooning to escape", "Temporary aggregation of sibblings following hatching from egg sac")
+
+urban <- c("Urban Habitat", "No", "No", "No", "No", "Yes", "Yes", "Yes", "No", "No", "No", "No")
+
+ref <- c("References", "Fitzgerald and Ives 2017; Hodge and Storfer-Isser 1997; Jeanson et al. 2004", "Kasumovic and Jordan 2013; Lloyd and Elgar 1997", "Henaut and Machkour-M'Rabet 2010; Jeanson et al. 2004", "Feree et al. 2018; Lloyd and Elgar 1997", "Johnson et al. 2011", "Trubl et al. 2012", "Czaczkes et al. 2018; Mammola et al. 2018", "Petillon et al. 2012", "Riechert 1974", "Piacentini et al. 2021", "Marshall 1995; Mougenot et al. 2012; Riechert 1974")
+
+references <- data.frame(mech, mech2, rel, urban, ref)
+
+flextable(references[ ,1:5]) %>% 
+  delete_part(part = "header") %>% 
+  autofit() %>% 
+  hline(i = c("1", "7", "10", "12"), part = "body", border = officer::fp_border(width = 2)) %>% 
+    hline(i = c("2", "3", "4", "5", "6", "8", "9", "11"), part = "body", border = officer::fp_border(width = 1)) %>% 
+  merge_h(part = "body") %>% 
+  merge_v(j = 1, part = "body") %>% 
+  bold(i = 1, bold = TRUE, part = "body") %>% 
+  fontsize(size = 14, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  set_caption("") %>% 
+  save_as_image(path = here::here("manuscript/figures/references.png"))
 ```

@@ -112,13 +112,19 @@ predictors_agg
 
 **Table 1**
 
+```{r references, fig.width = 3.77, dpi = 300, out.width="50%"}
+knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/references.png")
+```
+
+**Table 2**
+
 ```{r landscape, fig.width = 3.77, dpi = 300, out.width="50%"}
 knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/landscape.png")
 ```
 
 \newpage
 
-**Table 2**
+**Table 3**
 
 ```{r pred_location, fig.width = 6.85, dpi = 300}
 knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/pred_location.png")
@@ -126,7 +132,7 @@ knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsi
 
 \newpage
 
-**Table 3** 
+**Table 4** 
 
 ```{r pred_table, fig.width = 6.85, dpi = 300}
 knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/pred_table.png")
