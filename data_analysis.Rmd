@@ -61,7 +61,7 @@ webs <- webs %>%
                                "Urban Forest" = "Forest",
                                "Urban Center" = "Campus"),
          Location = fct_relevel(Location, 
-                                "Urban Forest", "Urban Center"),
+                                "Urban Center", "Urban Forest"),
          Land = fct_recode(Land, 
                            "Urban, High" = "UrbanizedHighIntensity",
                            "Urban, Medium" = "UrbanizedMediumIntensity",
@@ -1823,12 +1823,12 @@ summary(comp)
 ```
 
 ```{r search_land_graph}
-sites <- sites %>% 
-  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
-                            "Woody Wetlands", 
-                            "Urban, High", 
-                            "Urban, Medium", 
-                            "Urban, Low"))
+#sites <- sites %>% 
+#  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
+#                            "Woody Wetlands", 
+#                            "Urban, High", 
+#                            "Urban, Medium", 
+#                            "Urban, Low"))
 nd <- data.frame(Land = factor(levels(sites$Land)))
 predictions <- augment(search_land, newdata = nd, se_fit = TRUE, type.predict = "response")
 predictions <- predictions %>% 
@@ -1852,9 +1852,9 @@ search_land_plot <- ggplot(sites, aes(x = Land, y = WalkDist)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
   annotate(geom="text", x=1, y=max(sites$WalkDist), label="A", color="black", size = 3) +
   annotate(geom="text", x=2, y=max(sites$WalkDist), label="B", color="black", size = 3) +
-  annotate(geom="text", x=3, y=max(sites$WalkDist), label="C", color="black", size = 3) +
-  annotate(geom="text", x=4, y=max(sites$WalkDist), label="A", color="black", size = 3) +
-  annotate(geom="text", x=5, y=max(sites$WalkDist), label="A", color="black", size = 3)
+  annotate(geom="text", x=3, y=max(sites$WalkDist), label="B", color="black", size = 3) +
+  annotate(geom="text", x=4, y=max(sites$WalkDist), label="B", color="black", size = 3) +
+  annotate(geom="text", x=5, y=max(sites$WalkDist), label="C", color="black", size = 3)
 
 search_land_plot
 ```
@@ -2509,12 +2509,12 @@ summary(comp)
 ```
 
 ```{r webs_land_graph}
-sites <- sites %>% 
-  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
-                            "Woody Wetlands", 
-                            "Urban, High", 
-                            "Urban, Medium", 
-                            "Urban, Low"))
+#sites <- sites %>% 
+#  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
+#                            "Woody Wetlands", 
+#                            "Urban, High", 
+#                            "Urban, Medium", 
+#                            "Urban, Low"))
 nd <- data.frame(Land = factor(levels(sites$Land)))
 predictions <- augment(webs_land, newdata = nd, se_fit = TRUE, type.predict = "response")
 predictions <- predictions %>% 
@@ -2538,7 +2538,7 @@ webs_land_plot <- ggplot(sites, aes(x = Land, y = NumWebs)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
   annotate(geom="text", x=1, y=max(sites$NumWebs), label="A", color="black", size = 3) +
   annotate(geom="text", x=2, y=max(sites$NumWebs), label="A", color="black", size = 3) +
-  annotate(geom="text", x=3, y=max(sites$NumWebs), label="B", color="black", size = 3) +
+  annotate(geom="text", x=3, y=max(sites$NumWebs), label="A", color="black", size = 3) +
   annotate(geom="text", x=4, y=max(sites$NumWebs), label="B", color="black", size = 3) +
   annotate(geom="text", x=5, y=max(sites$NumWebs), label="B", color="black", size = 3)
 
@@ -3133,12 +3133,12 @@ summary(comp)
 ```
 
 ```{r spiders_land_graph}
-sites <- sites %>% 
-  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
-                            "Woody Wetlands", 
-                            "Urban, High", 
-                            "Urban, Medium", 
-                            "Urban, Low"))
+#sites <- sites %>% 
+#  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
+#                            "Woody Wetlands", 
+#                            "Urban, High", 
+#                            "Urban, Medium", 
+#                            "Urban, Low"))
 nd <- data.frame(Land = factor(levels(sites$Land)))
 predictions <- augment(spiders_land, newdata = nd, se_fit = TRUE, type.predict = "response")
 predictions <- predictions %>% 
@@ -3162,7 +3162,7 @@ spiders_land_plot <- ggplot(sites, aes(x = Land, y = NumSpiders)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) +
   annotate(geom="text", x=1, y=max(sites$NumSpiders), label="A", color="black", size = 3) +
   annotate(geom="text", x=2, y=max(sites$NumSpiders), label="A", color="black", size = 3) +
-  annotate(geom="text", x=3, y=max(sites$NumSpiders), label="B", color="black", size = 3) +
+  annotate(geom="text", x=3, y=max(sites$NumSpiders), label="A", color="black", size = 3) +
   annotate(geom="text", x=4, y=max(sites$NumSpiders), label="B", color="black", size = 3) +
   annotate(geom="text", x=5, y=max(sites$NumSpiders), label="B", color="black", size = 3)
 
@@ -3334,7 +3334,7 @@ raw_plot_dist <- ggplot(web_dist, aes(x = Neighbor, y = RetreatDist)) +
     scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
     scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
     theme_classic() +
-    scale_y_continuous(limits = c(0, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
+    scale_y_continuous(limits = c(-50, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
     xlab("Nearest Neighbors") +
     ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
     theme(text = element_text(size = 10)) + 
@@ -3372,7 +3372,7 @@ poisson_plot_dist <- ggplot(web_dist, aes(x = Neighbor, y = RetreatDist)) +
   scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
   scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
   theme_classic() +
-  scale_y_continuous(limits = c(0, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
+  scale_y_continuous(limits = c(-50, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
   xlab("Nearest Neighbors") +
   ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
   theme(text = element_text(size = 10)) + 
@@ -3410,7 +3410,7 @@ log_plot_dist <- ggplot(web_dist, aes(x = Neighbor, y = (RetreatDist))) +
   scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
   scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
   theme_classic() +
-  scale_y_continuous(limits = c(0, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
+  scale_y_continuous(limits = c(-50, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
   xlab("Nearest Neighbors") +
   ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
   theme(text = element_text(size = 10)) + 
@@ -3948,12 +3948,12 @@ summary(comp)
 ```
 
 ```{r dist_land_graph}
-near <- near %>% 
-  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
-                            "Woody Wetlands", 
-                            "Urban, High", 
-                            "Urban, Medium", 
-                            "Urban, Low"))
+#near <- near %>% 
+#  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
+#                            "Woody Wetlands", 
+#                            "Urban, High", 
+#                            "Urban, Medium", 
+#                            "Urban, Low"))
 nd <- data.frame(Land = factor(levels(sites$Land)))
 predictions <- augment(dist_land, newdata = nd, se_fit = TRUE, type.predict = "response")
 predictions <- predictions %>% 
@@ -4591,12 +4591,12 @@ summary(comp)
 ```
 
 ```{r height_land_graph}
-webs <- webs %>% 
-  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
-                            "Woody Wetlands", 
-                            "Urban, High", 
-                            "Urban, Medium", 
-                            "Urban, Low"))
+#webs <- webs %>% 
+#  mutate(Land = fct_relevel(Land, "Deciduous Forest", 
+#                            "Woody Wetlands", 
+#                            "Urban, High", 
+#                            "Urban, Medium", 
+#                            "Urban, Low"))
 predictions <- expand.grid(Land = levels(factor(webs$Land)))
 predictions$response <- predict(height_land, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
 
@@ -4698,7 +4698,7 @@ labels1 <- ggarrange(blankPlot, plant_text, tree_text, road_text, highway_text, 
 
 labels2 <- ggarrange(blankPlot, plant_text, spec_text, rlength_text, blankPlot, ncol = 5, nrow = 1, widths = c(0.1, 0.225, 0.225, 0.225, 0.225))
 
-predictors_agg <- ggarrange(agg1, labels1, agg2, labels2, nrow = 4, heights = c(0.35, 0.15, 0.35, 0.15))
+predictors_agg <- ggarrange(agg2, labels2, agg1, labels1, nrow = 4, heights = c(0.35, 0.15, 0.35, 0.15))
 #saveRDS(predictors_agg, "manuscript/figures/predictors_agg.Rds")
 ```
 
@@ -4711,7 +4711,7 @@ rownames(land_cover) <- c("Area (sq. km)", "Tree Cover (%)", "Impervious Cover (
 names <- rownames(land_cover)
 rownames(land_cover) <- seq(1:nrow(land_cover))
 land_cover <- cbind(names, land_cover)
-colnames(land_cover) <- c(" ", "Lincoln City Limits", "UNL City Campus \nUrban Center", "Wilderness Park \nUrban Forest")
+colnames(land_cover) <- c(" ", "Urban Center \n(UNL City Campus)", "Urban Forest \n(Wilderness Park)", "Lincoln City Limits")
 flextable(land_cover[ ,1:4]) %>% 
   autofit() %>% 
   hline(i = c("3", "4", "8", "9", "13", "14"), part = "body") %>% 
@@ -4726,9 +4726,9 @@ flextable(land_cover[ ,1:4]) %>%
 ### Predictors by Location
 
 ```{r pred_location, fig.width = 6.85, dpi = 300}
-mean_se1 <- c("Mean ± Std. Error", "Wilderness Park \nUrban Forest", "47.15 ± 2.17", "1.27 ± 0.36", "137.44 ± 3.71", "5.89 ± 0.77", "13.30 ± 1.15", "46,294.7 ± 68.040", "104 ± 3.23", "35.6 ± 1.89", "15.67 ± 1.25")
-mean_se2 <- c("Mean ± Std. Error", "UNL City Campus \n Urban Center", "1.58 ± 0.36", "76.52 ± 2.53", "153.39 ± 3.58", "116.90 ± 3.12", "3.33 ± 0.53", "116.90 ± 3.12", "398 ± 5.76", "65.0 ± 2.33", "93.03 ± 2.78")
-pred_location <- data.frame(mean_se1, mean_se2)
+mean_se1 <- c("Mean ± Std. Error", "Urban Forest \n(Wilderness Park)", "47.15 ± 2.17", "1.27 ± 0.36", "137.44 ± 3.71", "5.89 ± 0.77", "13.30 ± 1.15", "46,294.7 ± 68.040", "104 ± 3.23", "35.6 ± 1.89", "15.67 ± 1.25")
+mean_se2 <- c("Mean ± Std. Error", "Urban Center \n(UNL City Campus)", "1.58 ± 0.36", "76.52 ± 2.53", "153.39 ± 3.58", "116.90 ± 3.12", "3.33 ± 0.53", "116.90 ± 3.12", "398 ± 5.76", "65.0 ± 2.33", "93.03 ± 2.78")
+pred_location <- data.frame(mean_se2, mean_se1)
 rownames(pred_location) <- c("", " ", "Percent Tree Cover [%]", "Percent Impervious Cover [%]", "Spectral Radiance [Watts/(m² * sr * µm)]", "Artificial Night Sky Radiance [mcd/m²]", "Plant Species Richness", "Patch Area [m²]", "Road Disturbance [vehicles/day/m]", "Highway Disturbance [vehicles/day/m]", "Total Road Length [m]")
 names <- rownames(pred_location)
 rownames(pred_location) <- seq(1:nrow(pred_location))
@@ -4816,7 +4816,7 @@ flextable(pred_table[ , 1:9]) %>%
 ```{r substrate}
 substrates %>% 
   mutate(Location = fct_recode(Location, "Urban Center" = "Campus", "Urban Forest" = "Forest"),
-         Location = fct_relevel(Location, "Urban Forest", "Urban Center")) %>% 
+         Location = fct_relevel(Location, "Urban Center", "Urban Forest")) %>% 
   ggplot(aes(x = Location, y = Number, fill = factor(Type, levels=c("Cement", "Metal", "Plastic", "Rocks", "Herb", "Litter", "Shrub", "Tree", "Vine")))) + 
   geom_bar(position = "fill",stat = "identity", alpha=1.0) + 
   scale_y_continuous(labels = scales::percent_format()) + 

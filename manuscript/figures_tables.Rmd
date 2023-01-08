@@ -110,13 +110,13 @@ predictors_agg
 
 ## Tables
 
-**Table 1**
+```{r references, fig.width = 3.77, dpi = 300, out.width="50%", include = FALSE}
+#Examples of studies elucidating the mechanisms behind spider aggregations. Mechanisms are categorized by inter- and intraspecific interactions, environmental factors, and dispersal, but it is important to note that these categories are likely inter-related. The table is meant to provide examples, rather than represent a full review of studies. Several aggregation mechanisms were studied in urban habitats. 
 
-```{r references, fig.width = 3.77, dpi = 300, out.width="50%"}
 knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/references.png")
 ```
 
-**Table 2**
+**Table 1**
 
 ```{r landscape, fig.width = 3.77, dpi = 300, out.width="50%"}
 knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/landscape.png")
@@ -124,7 +124,7 @@ knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsi
 
 \newpage
 
-**Table 3**
+**Table 2**
 
 ```{r pred_location, fig.width = 6.85, dpi = 300}
 knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/pred_location.png")
@@ -132,7 +132,7 @@ knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsi
 
 \newpage
 
-**Table 4** 
+**Table 3** 
 
 ```{r pred_table, fig.width = 6.85, dpi = 300}
 knitr::include_graphics("/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation/manuscript/figures/pred_table.png")
