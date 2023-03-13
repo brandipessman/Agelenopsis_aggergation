@@ -1,0 +1,17 @@
+Variable	Model	Predictor	Estimate	SE	Z	P	R	AICc
+NumWebs	Overall	plant	-1.0825084	0.2203723	-4.912181	0.001	0.5749227	0.66
+NumWebs	Overall	tdh	-0.9217427	0.3560199	-2.589021	0.009624933	0.5749227	0.66
+NumWebs	Center	tdh	-1.087681	0.4373733	-2.486849	0.01288802	0.3419393	0.336
+NumWebs	Forest	Null	0	0	0	0	0	0.578
+NumSpiders	Overall	plant	-0.9397791	0.2172899	-4.325001	0.001	0.5504184	0.678
+NumSpiders	Overall	tdh	-0.9502	0.3758	-2.528	0.0115	0.5504184	0.678
+NumSpiders	Center	tdh	-1.071606	0.4860931	-2.205	0.027487165	0.3040309	0.202
+NumSpiders	Forest	Null	0	0	0	0	0	0.59
+RetreatDist	Overall	plant	0.6328	0.2415	2.621	0.00878	0.2222188	0.414
+RetreatDist	Center	road	-0.02663	0.01201	-2.216	0.0267	0.4269916	0.25
+RetreatDist	Forest	Null	0	0	0	0	0	0.602
+RetreatHeight	Overall	plant	0.4922335	0.1675158	2.938431	0.003298783	0.1808626	0.344
+RetreatHeight	Overall	tdr	-0.1743851	0.1016864	-1.714929	0.08635818	0.1808626	0.3444
+RetreatHeight	Center	plant	0.7005	0.3688	1.899	0.0575	0.1347342	0.051
+RetreatHeight	Center	road_scale	1.3617034	0.7668682	1.7756682	0.07578762	0.1347342	0.051
+RetreatHeight	Forest	tree_frac	4.8456	1.7114	2.831	0.00464	0.2387523	0.217
