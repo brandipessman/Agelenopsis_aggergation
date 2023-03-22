@@ -3643,7 +3643,7 @@ nb_plot_dist <- ggplot(web_dist, aes(x = Neighbor, y = RetreatDist)) +
   scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
   scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
   theme_classic() +
-  scale_y_continuous(limits = c(-50, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
+  scale_y_continuous(limits = c(-50, 1050), breaks = c(0, 200, 400, 600, 800, 1000)) +
   xlab("Nearest Neighbors") +
   ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
   theme(text = element_text(size = 10)) + 
@@ -5300,8 +5300,8 @@ blankPlot <- ggplot() +
   geom_blank(aes(1,1)) + 
   cowplot::theme_nothing()
 
-main_row1 <- ggarrange(nb_plot_search, nb_plot_webs, nb_plot_spiders, labels = c("a", "b", "c"), nrow = 1, font.label = list(size = 10))
-main_row2 <- ggarrange(nb_plot_dist, nb_plot_height, blankPlot, labels = c("d", "e", ""), nrow = 1, font.label = list(size = 10))
+main_row1 <- ggarrange(nb_plot_webs, nb_plot_spiders, blankPlot, labels = c("a", "b", ""), nrow = 1, font.label = list(size = 10))
+main_row2 <- ggarrange(nb_plot_search, nb_plot_dist, nb_plot_height, labels = c("c", "d", "e"), nrow = 1, font.label = list(size = 10))
 
 main <- ggarrange(main_row1, main_row2, nrow = 2, font.label = list(size = 10))
 main
@@ -5423,7 +5423,7 @@ predictors_agg <- ggarrange(agg2, labels2, agg1, labels1, nrow = 4, heights = c(
 ### Landscape Features by Location
 
 ```{r landscape_table}
-rownames(land_cover) <- c("Area (sq. km)", "Tree Cover (%)", "Impervious Cover (%)", "Urban Cover (%)", "Urban, High Intensity (%)", "Urban, Medium Intensity (%)", "Urban, low Intensity (%)", "Urban, Open Space (%)", "Forest Cover (%)", "Deciduous Forest (%)", "Mixed Forest (%)", "Evergreen Forest (%)", "Woody Wetlands (%)", "Other Cover (%)", "Herbaceous Wetlands (%)", "Grassland Herbaceous (%)", "Pasture (%)", "Cultivated Crop (%)", "Open Water (%)")
+rownames(land_cover) <- c("Area (sq. km)", "Tree Cover (%)", "Impervious Cover (%)", "Urban Cover (%)", "Urban, High Intensity (%)", "Urban, Medium Intensity (%)", "Urban, Low Intensity (%)", "Urban, Open Space (%)", "Forest Cover (%)", "Deciduous Forest (%)", "Mixed Forest (%)", "Evergreen Forest (%)", "Woody Wetlands (%)", "Other Cover (%)", "Herbaceous Wetlands (%)", "Grassland Herbaceous (%)", "Pasture (%)", "Cultivated Crop (%)", "Open Water (%)")
 names <- rownames(land_cover)
 rownames(land_cover) <- seq(1:nrow(land_cover))
 land_cover <- cbind(names, land_cover)
@@ -5521,7 +5521,7 @@ flextable(pred_table_nb[ , 1:9]) %>%
     c("Predictors that were natural log-transformed prior to model evaluation. Estimate and standard errors are not back transformed.")), 
     ref_symbols = c("a"), part = "body") %>% 
       footnote(i = 15, j = 3, value = as_paragraph(
-    c("Total road Length was scaled (without centering) by dividing each value of road length by the root mean square prior to model evaluation to avoid model convergence issues.")),
+    c("Total road length was scaled (without centering) by dividing each value of road length by the root mean square prior to model evaluation to avoid model convergence issues.")),
     ref_symbols = c("b"), part = "body") %>% 
     footnote(i = 16, j = 3, value = as_paragraph(
     c("Tree cover is assessed as proportion (value from 0 to 1) rather than a percent (values 0 to 100) to avoid model convergence issues.")), 
@@ -5585,7 +5585,20 @@ predictors_overall <- ggarrange(graphs, labels, nrow = 2, heights = c(0.8, 0.2))
 ## Response Variables by Land Cover Class
 
 ```{r land_plots}
+library("gridExtra")
+library("cowplot")
+
 land_plots <- ggarrange(search_land_plot, ggarrange(webs_land_plot, spiders_land_plot, dist_land_plot, height_land_plot, labels = c("b", "c", "d", "e"), ncol = 2, nrow = 2, legend = "none", align = "hv"), labels = c("a"), widths = c(0.3, 0.7))
+
+gt <- arrangeGrob(webs_land_plot, spiders_land_plot,
+             search_land_plot, dist_land_plot, 
+             height_land_plot,
+             ncol = 3, nrow = 2, 
+             layout_matrix = rbind(c(1, 2, 5), c(3, 4, 5)))
+
+land_plots <- as_ggplot(gt) +                                # transform to a ggplot
+  draw_plot_label(label = c("a", "c", "b", "d", "e"), size = 15,
+                  x = c(0, 0, 0.33, 0.33, 0.66), y = c(1, 0.5, 1, 0.5, 1))
 
 land_plots
 
@@ -5622,6 +5635,7 @@ pred_table_avg_nb <- read.table(file = "data/pred_table_avg_nb.txt", header = TR
 pred_table_avg_nb <- pred_table_avg_nb %>% 
   mutate(Variable = factor(Variable),
          Variable = fct_recode(Variable, "Number of Webs" = "NumWebs",
+                               "Number of Spiders" = "NumSpiders",
                                "Nearest Neighbor Distance" = "RetreatDist",
                                "Web Height" = "RetreatHeight"),
          Predictor = factor(Predictor),
@@ -5698,10 +5712,10 @@ flextable(pred_table_avg_nb[ , 1:8]) %>%
 ## Table of Land Stats
 
 ```{r land_stats}
-Variable <- c("Search Distance", "Number of Webs", "Number of Spiders", "Neares Neighbor Distance", "Web Height")
-Chi <- c(6.37, 19.134, 10.913, 40.757, 12.569)
+Variable <- c("Number of Webs", "Number of Spiders", "Search Distance", "Neares Neighbor Distance", "Web Height")
+Chi <- c(19.134, 10.913, 6.37, 40.757, 12.569)
 df <- c("4, 21", "4, 21", "4, 21", "4, 20", "4, 130")
-P <- c("  0.173", "< 0.001 ***", "  0.028 *", "< 0.001 ***", "  0.014 *")
+P <- c("< 0.001 ***", "  0.028 *", "  0.173", "< 0.001 ***", "  0.014 *")
 land_stats <- data.frame(Variable, Chi, df, P)
 colnames(land_stats) <- c('Variable','Likelihood Ratio \nChi-Squared','Degrees of Freedom', 'P-Value')
 
