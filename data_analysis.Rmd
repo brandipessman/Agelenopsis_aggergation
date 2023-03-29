@@ -4595,7 +4595,7 @@ nb_plot_height <- ggplot(webs, aes(x = Location, y = RetreatHeight)) +
                     ymax = response + SE, 
                     color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1) +
     scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
-    scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+    scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 30", "Urban Center" = "Urban \nCenter \nN = 101")) +
     theme_classic() +
     scale_y_continuous(limits = c(0, 210), breaks = c(0, 35, 70, 105, 140, 175, 210)) +
     ylab("Web Height [cm]") + 
@@ -5423,7 +5423,7 @@ predictors_agg <- ggarrange(agg2, labels2, agg1, labels1, nrow = 4, heights = c(
 ### Landscape Features by Location
 
 ```{r landscape_table}
-rownames(land_cover) <- c("Area (sq. km)", "Tree Cover (%)", "Impervious Cover (%)", "Urban Cover (%)", "Urban, High Intensity (%)", "Urban, Medium Intensity (%)", "Urban, Low Intensity (%)", "Urban, Open Space (%)", "Forest Cover (%)", "Deciduous Forest (%)", "Mixed Forest (%)", "Evergreen Forest (%)", "Woody Wetlands (%)", "Other Cover (%)", "Herbaceous Wetlands (%)", "Grassland Herbaceous (%)", "Pasture (%)", "Cultivated Crop (%)", "Open Water (%)")
+rownames(land_cover) <- c("Area (sq. km)", "Impervious Cover (%)", "Tree Cover (%)", "Urban Cover (%)", "Urban, High Intensity (%)", "Urban, Medium Intensity (%)", "Urban, Low Intensity (%)", "Urban, Open Space (%)", "Forest Cover (%)", "Deciduous Forest (%)", "Mixed Forest (%)", "Evergreen Forest (%)", "Woody Wetlands (%)", "Other Cover (%)", "Herbaceous Wetlands (%)", "Grassland Herbaceous (%)", "Pasture (%)", "Cultivated Crop (%)", "Open Water (%)")
 names <- rownames(land_cover)
 rownames(land_cover) <- seq(1:nrow(land_cover))
 land_cover <- cbind(names, land_cover)
@@ -5442,10 +5442,10 @@ flextable(land_cover[ ,1:4]) %>%
 ### Predictors by Location
 
 ```{r pred_location, fig.width = 6.85, dpi = 300}
-mean_se1 <- c("Mean ± Std. Error", "Urban Forest \n(Wilderness Park)", "47.15 ± 3.46", "1.27 ± 0.36", "137.44 ± 3.71", "5.89 ± 0.91", "13.30 ± 1.56", "46,295 ± 11,128", "104 ± 36", "35.6 ± 6.04", "15.67 ± 7.54")
-mean_se2 <- c("Mean ± Std. Error", "Urban Center \n(UNL City Campus)", "1.58 ± 0.37", "76.52 ± 2.63", "153.39 ± 3.58", "116.90 ± 9.39", "3.33 ± 0.58", "654 ± 144", "398 ± 125", "65.0 ± 9.82", "93.03 ± 40.60")
+mean_se1 <- c("Mean ± Std. Error", "Urban Forest \n(Wilderness Park)", "1.27 ± 0.36", "47.15 ± 3.46", "137.44 ± 3.71", "5.89 ± 0.91", "13.30 ± 1.56", "46,295 ± 11,128", "104 ± 36", "35.6 ± 6.04", "15.67 ± 7.54")
+mean_se2 <- c("Mean ± Std. Error", "Urban Center \n(UNL City Campus)", "76.52 ± 2.63", "1.58 ± 0.37", "153.39 ± 3.58", "116.90 ± 9.39", "3.33 ± 0.58", "654 ± 144", "398 ± 125", "65.0 ± 9.82", "93.03 ± 40.60")
 pred_location <- data.frame(mean_se2, mean_se1)
-rownames(pred_location) <- c("", " ", "Percent Tree Cover [%]", "Percent Impervious Cover [%]", "Spectral Radiance [Watts/(m² * sr * µm)]", "Artificial Night Sky Radiance [mcd/m²]", "Plant Species Richness", "Patch Area [m²]", "Road-Traffic Impact [vehicles/day/m]", "Highway-Traffic Impact [vehicles/day/m]", "Total Road Length [m]")
+rownames(pred_location) <- c("", " ", "Percent Impervious Cover [%]", "Percent Tree Cover [%]", "Spectral Radiance [Watts/(m² * sr * µm)]", "Artificial Night Sky Radiance [mcd/m²]", "Plant Species Richness", "Patch Area [m²]", "Road-Traffic Impact [vehicles/day/m]", "Highway-Traffic Impact [vehicles/day/m]", "Total Road Length [m]")
 names <- rownames(pred_location)
 rownames(pred_location) <- seq(1:nrow(pred_location))
 pred_location <- cbind(names, pred_location)
@@ -5518,13 +5518,13 @@ flextable(pred_table_nb[ , 1:9]) %>%
   valign(valign = "top", part = "all") %>% 
   set_caption("") %>% 
   footnote(i = c(1:3, 5:7, 9, 12:14), j = 3, value = as_paragraph(
-    c("Predictors that were natural log-transformed prior to model evaluation. Estimate and standard errors are not back transformed.")), 
+    c("Predictors that were natural log-transformed prior to model evaluation. Estimate and standard errors were not back transformed.")), 
     ref_symbols = c("a"), part = "body") %>% 
       footnote(i = 15, j = 3, value = as_paragraph(
     c("Total road length was scaled (without centering) by dividing each value of road length by the root mean square prior to model evaluation to avoid model convergence issues.")),
     ref_symbols = c("b"), part = "body") %>% 
     footnote(i = 16, j = 3, value = as_paragraph(
-    c("Tree cover is assessed as proportion (value from 0 to 1) rather than a percent (values 0 to 100) to avoid model convergence issues.")), 
+    c("Tree cover was assessed as proportion (value from 0 to 1) rather than a percent (values 0 to 100) to avoid model convergence issues.")), 
     ref_symbols = c("c"), part = "body") %>% 
   save_as_image(path = here::here("manuscript/figures/pred_table_nb.png"))
 ```
@@ -5698,13 +5698,13 @@ flextable(pred_table_avg_nb[ , 1:8]) %>%
   valign(valign = "top", part = "all") %>% 
   set_caption("") %>% 
   footnote(i = c(1:3, 5:6, 9:13, 15:16, 19:20), j = 3, value = as_paragraph(
-    c("Predictors that were natural log-transformed prior to model evaluation. Estimate and standard errors are not back transformed.")), 
+    c("Predictors that were natural log-transformed prior to model evaluation. Estimate and standard errors were not back transformed.")), 
     ref_symbols = c("a"), part = "body") %>% 
   footnote(i = c(14, 17), j = 3, value = as_paragraph(
-    c("Spectral radiance and total road Length were scaled (without centering) by dividing each value of road length by the root mean square prior to model evaluation to avoid model convergence issues.")), 
+    c("Spectral radiance and total road length were scaled (without centering) by dividing each value of road length by the root mean square prior to model evaluation to avoid model convergence issues.")), 
     ref_symbols = c("b"), part = "body") %>% 
   footnote(i = 18, j = 3, value = as_paragraph(
-    c("Tree cover is assessed as proportion (value from 0 to 1) rather than a percent (values 0 to 100) to avoid model convergence issues.")), 
+    c("Tree cover was assessed as proportion (value from 0 to 1) rather than a percent (values 0 to 100) to avoid model convergence issues.")), 
     ref_symbols = c("c"), part = "body") %>% 
   save_as_image(path = here::here("manuscript/figures/pred_table_avg_nb.png"))
 ```

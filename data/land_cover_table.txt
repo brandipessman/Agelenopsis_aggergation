@@ -1,7 +1,7 @@
 	Campus	Forest	Lincoln
 Area	1.12	6.44	253.73
-Tree	0.79	40.32	5.97
 Impervious	78.32	1.73	40.97
+Tree	0.79	40.32	5.97
 Urban	100	5.44	79.42
 UrbanHigh	58.19	0.04	13.16
 UrbanMedium	33.28	0.95	28.49
