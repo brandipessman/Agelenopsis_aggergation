@@ -1,0 +1,70 @@
+---
+title: "Land cover effects on web abundance, aggregation, and position"
+author: "Brandi Pessman"
+date: "`r Sys.Date()`"
+output: html_document
+---
+# Setting the Working Directory and Global Code Chunk Options
+
+I have set message and warning to FALSE for every chunk so the knitted document does not include messages and warnings. 
+
+```{r setup}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation")
+```
+
+# Packages to Load
+
+```{r packages}
+library(MASS) # negative binomial tests
+library(multcomp) # for pairwise comparisons of land cover categories
+library(lme4) # to run the glmer function for the web distance (random effects)
+```
+
+# Import the Data from the wrangled_data/ folder
+
+```{r import}
+sites_wrangled <- readRDS('wrangled_data/sites_wrangled.RDS')
+neighbors_wrangled <- readRDS('wrangled_data/neighbors_wrangled.RDS')
+webs_wrangled <- readRDS('wrangled_data/webs_wrangled.RDS')
+```
+
+# Results of the negative binomial and post hoc analyses
+
+```{r results}
+# search distance
+search_land.nb <- glm.nb(WalkDist ~ Land, data = sites_wrangled)
+summary(search_land.nb)
+car::Anova(search_land.nb, test.statistic = "LR")
+comp <- glht(search_land.nb, linfct = mcp(Land = "Tukey"))
+summary(comp)
+
+# number of webs
+webs_land_nb <- glm.nb(NumWebs ~ Land, data = sites_wrangled)
+summary(webs_land_nb)
+car::Anova(webs_land_nb, test.statistic = "LR")
+comp <- glht(webs_land_nb, linfct = mcp(Land = "Tukey"))
+summary(comp)
+
+# number of spiders
+spiders_land_nb <- glm.nb(NumSpiders ~ Land, data = sites_wrangled)
+summary(spiders_land_nb)
+car::Anova(spiders_land_nb, test.statistic = "LR")
+comp <- glht(spiders_land_nb, linfct = mcp(Land = "Tukey"))
+summary(comp)
+
+# neighbor distances
+dist_land_nb <- glm.nb(round(RetreatDist, 0) ~ Land, data = neighbors_wrangled)
+summary(dist_land_nb)
+car::Anova(dist_land_nb, test.statistic = "LR")
+comp <- glht(dist_land_nb, linfct = mcp(Land = "Tukey"))
+summary(comp)
+
+# web height
+height_land_nb <- glmer.nb(round(RetreatHeight, 0) ~ Land + (1 | ID), data = webs_wrangled)
+summary(height_land_nb)
+car::Anova(height_land_nb, type = 3)
+comp <- glht(height_land_nb, linfct = mcp(Land = "Tukey"))
+summary(comp)
+```

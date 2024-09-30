@@ -1,0 +1,862 @@
+---
+title: "Figures for Publication"
+author: "Brandi Pessman"
+date: "`r Sys.Date()`"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Set the Working Directory and Global Code Chunk Options
+
+I have set message, warning, and echo to FALSE for every chunk so the knitted
+document does not include messages, warnings, or code.
+
+```{r setup, message = FALSE, warning = FALSE, echo = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation")
+```
+
+# Packages Loaded
+
+```{r packages}
+library(tidyverse) # for making graphs
+library(MASS) # negative binomial tests
+library(lme4) # to run the glmer function for the web distance (random effects)
+library(MuMIn) # to run the dredge function
+library(broom) # allows us to use augment when getting predicted values from the model
+library(broom.mixed) # for augment of the mixed effect models (web distance) to look at assumptions
+library(ggpubr) # using ggarrange to make multi-panel figures
+library(jpeg) # save pictures
+library(gridExtra)
+library(cowplot)
+source('functions/get_predictions_function.R') #  get predictions for bootstrapping
+```
+
+# BigBoot Function
+
+```{r  bootstrapping function}
+BootFunc <- function(mm) {
+    predict(mm, newdata = predictions, re.form = ~0, type = "response")
+}
+```
+
+# Imported the Data from the wrangled_data/ folder
+
+```{r import}
+substrates <- read.table(file = "data/substrate.txt", header = TRUE)
+sites_wrangled <- readRDS('wrangled_data/sites_wrangled.RDS')
+neighbors_wrangled <- readRDS('wrangled_data/neighbors_wrangled.RDS')
+webs_wrangled <- readRDS('wrangled_data/webs_wrangled.RDS')
+```
+
+# Figure 3
+
+```{r figure 3}
+# Search Distance
+search.nb <- glm.nb(WalkDist ~ Location, data = sites_wrangled)
+nd <- data.frame(Location = factor(levels(sites_wrangled$Location)))
+predictions <- augment(search.nb, newdata = nd, se_fit = TRUE, type.predict = "response")
+predictions <- predictions %>% 
+  rename("rate" = ".fitted", "SE" = ".se.fit")
+search_plot_nb <- ggplot(sites_wrangled, aes(x = Location, y = WalkDist)) + 
+  geom_jitter(color = "grey", width = 0.1) +
+  geom_point(aes(x = Location, y = rate, color = Location), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Location, 
+                  ymin = rate - SE, 
+                  ymax = rate + SE,
+                  color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1) +
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+  theme_classic() +
+  scale_y_continuous(limits = c(0, 275), breaks = c(0, 50, 100, 150, 200, 250)) +
+  xlab("Collection Location") +
+  ylab("Search Distance [m]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10),
+        axis.title.x = element_blank()) +
+  theme(legend.position = "none") +
+  annotate(geom = "text", x = 1.5, y = 275, label = "N.S.", color = "black", size = 3)
+
+# number of webs
+web.nb <- glm.nb(NumWebs ~ Location, data = sites_wrangled)
+nd <- data.frame(Location = factor(levels(sites_wrangled$Location)))
+predictions <- augment(web.nb, newdata = nd, se_fit = TRUE, type.predict = "response")
+predictions <- predictions %>% 
+  rename("rate" = ".fitted", "SE" = ".se.fit")
+webs_plot_nb <- ggplot(sites_wrangled, aes(x = Location, y = NumWebs)) + 
+  geom_jitter(color = "grey", width = 0.1) +
+  geom_point(aes(x = Location, y = rate, color = Location), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Location, 
+                  ymin = rate - SE, 
+                  ymax = rate + SE,
+                  color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1) +
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+  theme_classic() +
+    scale_y_continuous(limits = c(0, 75), breaks = c(0, 15, 30, 45, 60, 75)) +
+  ylab("Number of Webs") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10),
+        axis.title.x = element_blank()) +
+  theme(legend.position = "none") +
+  annotate(geom = "text", x = 1.5, y = 75, label = "***", color = "black", size = 5) 
+
+# number of spiders
+spiders.nb <- glm.nb(NumSpiders ~ Location, data = sites_wrangled)
+nd <- data.frame(Location = factor(levels(sites_wrangled$Location)))
+predictions <- augment(spiders.nb, newdata = nd, se_fit = TRUE, type.predict = "response")
+predictions <- predictions %>% 
+  rename("rate" = ".fitted", "SE" = ".se.fit")
+#predictions <- summary(emmeans(spiders, ~Location),type = "response")
+
+spiders_plot_nb <- ggplot(sites_wrangled, aes(x = Location, y = NumSpiders)) + 
+  geom_jitter(color = "grey", width = 0.1) +
+  geom_point(aes(x = Location, y = rate, color = Location), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Location, 
+                  ymin = rate - SE, 
+                  ymax = rate + SE,
+                  color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1) +
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+  theme_classic() +
+    scale_y_continuous(limits = c(0, 25), breaks = c(0, 5, 10, 15, 20, 25)) +
+  ylab("Number of Spiders") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10),
+        axis.title.x = element_blank()) +
+  theme(legend.position = "none") +
+  annotate(geom = "text", x = 1.5, y = 25, label = "**", color = "black", size = 5)
+
+# nearest neighbor distances
+dist.nb <- glmer.nb(round(RetreatDist, 0) ~ Location * factor(Neighbor) + (1 | ID), data = neighbors_wrangled)
+predictions <- expand.grid(Location = levels(factor(neighbors_wrangled$Location)), Neighbor = levels(factor(neighbors_wrangled$Neighbor)))
+predictions$response <- predict(dist.nb, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+bigBoot_dist_location_nb <- bootMer(dist.nb, BootFunc, nsim = 1000)
+predSE <- t(apply(bigBoot_dist_location_nb$t, MARGIN = 2, FUN = sd, na.rm = TRUE))
+predictions$SE <- predSE[1, ]
+neighbor_plot_nb <- ggplot(neighbors_wrangled, aes(x = Neighbor, y = RetreatDist)) + 
+  geom_jitter(aes(color = Location), alpha = 0.5, width = 0.1) +
+    geom_line(aes(x = Neighbor, y = response, group = Location), size = 2, data = predictions, color = "grey") +
+  geom_point(aes(x = Neighbor, y = response, color = Location), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Neighbor, 
+                  ymin = response - SE, 
+                  ymax = response + SE,
+                  color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1) +
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+  theme_classic() +
+  scale_y_continuous(limits = c(-50, 1050), breaks = c(0, 200, 400, 600, 800, 1000)) +
+  xlab("Nearest Neighbors") +
+  ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(legend.position = "none")
+
+# web height
+height.nb <- glmer.nb(round(RetreatHeight, 0) ~ Location + (1 | ID), data = webs_wrangled)
+predictions <- expand.grid(Location = levels(factor(webs_wrangled$Location)))
+predictions$response <- predict(height.nb, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+bigBoot_height_location_nb <- bootMer(height.nb, BootFunc, nsim = 1000)
+predSE <- t(apply(bigBoot_height_location_nb$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+height_plot_nb <- ggplot(webs_wrangled, aes(x = Location, y = RetreatHeight)) + 
+  geom_jitter(color = "grey", width = 0.1) +
+  geom_point(aes(x = Location, y = response, color = Location), size = 2, data = predictions) +
+  geom_errorbar(aes(x= Location, 
+                    ymin = response - SE, 
+                    ymax = response + SE, 
+                    color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1) +
+    scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+    scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 30", "Urban Center" = "Urban \nCenter \nN = 101")) +
+    theme_classic() +
+    scale_y_continuous(limits = c(0, 210), breaks = c(0, 35, 70, 105, 140, 175, 210)) +
+    ylab("Web Height [cm]") + 
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
+        axis.title.x = element_blank()) +
+    theme(legend.position = "none") +
+    annotate(geom = "text", x = 1.5, y = 210, label = "*", color = "black", size = 5)
+
+blankPlot <- ggplot() + 
+  geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing()
+
+main_row1 <- ggarrange(webs_plot_nb, spiders_plot_nb, blankPlot, labels = c("a", "b", ""), nrow = 1, font.label = list(size = 10))
+main_row2 <- ggarrange(search_plot_nb, neighbor_plot_nb, height_plot_nb, labels = c("c", "d", "e"), nrow = 1, font.label = list(size = 10))
+
+main <- ggarrange(main_row1, main_row2, nrow = 2, font.label = list(size = 10))
+main
+jpeg(filename = "figures/figure3.jpeg", units = "cm", width = 17.4, height = 17.4, res = 300)
+print(main)
+dev.off()
+```
+
+**Fig. 3** Comparison of the number of webs (a) and spiders (b) in a 10-m radius of the focal web, search distance (c), the distance from the focal web to the first and second (d) nearest neighbors, and web height (e) by habitat—urban center vs. urban forest. Grey jittered points (and faded colored points by habitat in d) represent the raw data, while colored points (orange = urban center, green = urban forest) and error bars represent the mean and standard error, respectively, from model predictions. Models were either negative binomial generalized linear models (a–c) or negative binomial generalized linear mixed effect models with site as a random factor (d–e). Asterisks indicate significance level (\*\*\* P \< 0.001; \*\* P \< 0.01; \* P \< 0.05, N.S. = not significant). We found more webs (a) and spiders (b) in a 10-m radius of the focal web in the urban center than the urban forest. Search distance did not differ between habitats (c), but we measured shorter distances between the focal web and the two nearest neighbors (d), and recorded shorter web heights (e) in the urban center than the urban forest.
+
+# Figure 4
+
+```{r figure 4 webs}
+colorc = "#d95f02" 
+colorf = "#1b9e77"
+coloro = "black"
+
+# number of webs
+global <- glm.nb(NumWebs ~ log_TotalSub + log_tdr + log_tdh, data = sites_wrangled)
+options(na.action = "na.fail") 
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
+options(na.action = "na.omit") 
+top_model_webs_o <- get.models(model_dredge, subset = 1)[[1]]
+nd <- data.frame(log_TotalSub = seq(0, 3.2, 0.03), 
+                 log_tdh = mean(sites_wrangled$log_tdh))
+predicted.distance <- augment(top_model_webs_o, 
+                              newdata = nd, 
+                              se_fit = TRUE)
+webs_plant <- ggplot(sites_wrangled, aes(x = log_TotalSub, y = log(NumWebs))) + 
+  geom_point(aes(color = Location), alpha = 0.7,  
+             size = 1) +
+  geom_line(aes(x = log_TotalSub, y = .fitted), 
+            size = 1, 
+            color = coloro, 
+            data = predicted.distance) + 
+  geom_ribbon(aes(x = log_TotalSub, 
+                  ymin = .fitted - 1.96 * .se.fit, 
+                  ymax = .fitted + 1.96 * .se.fit), 
+              fill = coloro, 
+              data = predicted.distance, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(-2, 5), breaks = c(-2, 0, 2, 4)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Plant Species Richness [ln()]") +
+  ylab("Number of Webs [ln()]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        legend.position = "none") + 
+  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = 4.8, label = "***", color = "black", size = 4)
+```
+
+```{r figure 4 spiders}
+# number of spiders
+global <- glm.nb(NumSpiders ~ log_TotalSub + log_tdr + log_tdh, data = sites_wrangled)
+options(na.action = "na.fail")
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
+options(na.action = "na.omit") 
+top_model_spiders_o <- get.models(model_dredge, subset = 1)[[1]]
+nd <- data.frame(log_TotalSub = seq(0, 3.2, 0.03), 
+                 log_tdh = mean(sites_wrangled$log_tdh))
+predicted.distance <- augment(top_model_spiders_o, 
+                              newdata = nd, 
+                              se_fit = TRUE)
+spiders_plant <- ggplot(sites_wrangled, aes(x = log_TotalSub, y = log(NumSpiders))) + 
+  geom_point(aes(color = Location), alpha = 0.7, 
+             size = 1) +
+  geom_line(aes(x = log_TotalSub, y = .fitted), 
+            size = 1, 
+            color = coloro, 
+            data = predicted.distance) + 
+  geom_ribbon(aes(x = log_TotalSub, 
+                  ymin = .fitted - 1.96 * .se.fit, 
+                  ymax = .fitted + 1.96 * .se.fit), 
+              fill = coloro, 
+              data = predicted.distance, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(-2, 5), breaks = c(-2, 0, 2, 4)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Plant Species Richness [ln()]") +
+  ylab("Number of Spiders [ln()]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        legend.position = "none") + 
+    annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = 5, label = "***", color = "black", size = 4)
+```
+
+```{r figure 4 neighbor}
+# nearest neighbor distances
+nearest <- neighbors_wrangled %>% 
+  filter(Web == "W002")
+global <- glm.nb(round(RetreatDist, 0) ~ log_TotalSub + log_tdr + log_tdh, data = nearest)
+options(na.action = "na.fail") 
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
+options(na.action = "na.omit") 
+top_model_neighbor_o <- get.models(model_dredge, subset = 1)[[1]]
+nd <- data.frame(log_TotalSub = seq(0, 3.2, 0.03))
+predicted.distance <- augment(top_model_neighbor_o, 
+                              newdata = nd, 
+                              se_fit = TRUE)
+dist_plant <- ggplot(nearest, aes(x = log_TotalSub, y = log(RetreatDist))) + 
+  geom_point(aes(color = Location), alpha = 0.7, 
+             size = 1) +
+  geom_line(aes(x = log_TotalSub, y = .fitted), 
+            size = 1, 
+            color = coloro, 
+            data = predicted.distance) + 
+  geom_ribbon(aes(x = log_TotalSub, 
+                  ymin = .fitted - 1.96 * .se.fit, 
+                  ymax = .fitted + 1.96 * .se.fit), 
+              fill = coloro, 
+              data = predicted.distance, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(2, 7.3), breaks = c(2, 3, 4, 5, 6, 7)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Plant Species Richness [ln()]") +
+  ylab("Distance from Focal Web \nto Neighbor Web [ln(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        legend.position = "none") +
+  annotate(geom = "text", x = min(predicted.distance$log_TotalSub) + diff(range(predicted.distance$log_TotalSub))/2, y = 7, label = "**", color = "black", size = 4)
+```
+
+```{r figure 4 height}
+# web height
+global <- glmer.nb(round(RetreatHeight, 0) ~ log_TotalSub + log_tdr + log_tdh + (1 | ID), data = webs_wrangled)
+options(na.action = "na.fail") 
+model_dredge <- dredge(global, beta = "none", evaluate = TRUE, rank = AICc)
+options(na.action = "na.omit") 
+top_model_height_o <- get.models(model_dredge, subset = 1)[[1]]
+predictions <- expand.grid(log_TotalSub = seq(0, 3.15, 0.03),
+                           log_tdr = mean(webs_wrangled$log_tdr))
+predictions$response <- predict(top_model_height_o, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+bigBoot_height_overall_plant_nb <- bootMer(top_model_height_o, BootFunc, nsim = 1000)
+predSE <- t(apply(bigBoot_height_overall_plant_nb$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+height_plant <- ggplot(webs_wrangled, aes(x = log_TotalSub, y = log(RetreatHeight))) + 
+  geom_point(aes(color = Location), alpha = 0.7, 
+             size = 1) +
+  geom_line(aes(x = log_TotalSub, y = log(response)), 
+            size = 1, 
+            color = coloro, 
+            data = predictions) + 
+  geom_ribbon(aes(x = log_TotalSub, 
+                  ymin = log(response - 1.96 * SE), 
+                  ymax = log(response + 1.96 * SE)), 
+              fill = coloro, 
+              data = predictions, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(-2.5, 6), breaks = c(-2, 0, 2, 4, 6)) + 
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Plant Species Richness [ln()]") +
+  ylab("Web Height [ln(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        legend.position = "none") + 
+    annotate(geom = "text", x = min(predictions$log_TotalSub) + diff(range(predictions$log_TotalSub))/2, y = 5.8, label = "**", color = "black", size = 4)
+```
+
+```{r figure 4 panel}
+webs_text <- as_ggplot(text_grob(paste("Number of \nWebs \n[ln()]"), size = 10))
+spiders_text <- as_ggplot(text_grob(paste("Number of \nSpiders \n[ln()]"), size = 10))
+dist_text <- as_ggplot(text_grob(paste("Nearest \nNeighbor \nDist. [ln(cm)]"), size = 10))
+height_text <- as_ggplot(text_grob(paste("Web \nHeight \n[ln(cm)]"), size = 10))
+plant_text <- as_ggplot(text_grob(paste("Plant Species Richness [ln()]"), size = 10))
+blankPlot <- ggplot()+geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing() 
+
+pred_plant <- ggarrange(webs_text, webs_plant, 
+                spiders_text, spiders_plant, 
+                dist_text, dist_plant, 
+                height_text, height_plant,
+                blankPlot, plant_text,
+                ncol = 2, nrow = 5, 
+                widths = c(0.3, 0.7), 
+                heights = c(0.24, 0.24, 0.24, 0.24, 0.04))
+
+jpeg(filename = "figures/figure4.jpeg", units = "cm", width = 8.4, height = 17.4, res = 300)
+print(pred_plant)
+dev.off()
+pred_plant
+```
+
+**Fig. 4** Significant correlations between measures of abundance, aggregation, and position, and plant species richness for the overall data. The regression lines and shaded regions represent the predictions and 95% confidence intervals (respectively) from the top negative binomial generalized linear model after AIC selection. The points represent the raw data (orange = urban center, green = urban forest). Asterisks indicate significance level (*** P < 0.001; ** P < 0.01; * P < 0.05).
+
+# Figure 5
+
+```{r figure 5 webs}
+sites_center <- sites_wrangled %>% 
+  filter(Location == "Urban Center")
+# number of webs
+global <- glm.nb(NumWebs ~ log_TotalSub + log_tdr + log_tdh + spec_rad + log_patch + road_length_m, data = sites_center)
+options(na.action = "na.fail") 
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
+options(na.action = "na.omit") 
+top_model_webs_c <- get.models(model_dredge, subset = 1)[[1]]
+nd <- data.frame(log_tdh = seq(3.32, 5.42, 0.02))
+predicted.distance <- augment(top_model_webs_c, 
+                              newdata = nd, 
+                              se_fit = TRUE)
+webs_center_tdh <- ggplot(sites_wrangled, aes(x = log_tdh, y = log(NumWebs))) + 
+  geom_point(aes(color = Location), alpha = 0.5, 
+             size = 1) +
+  geom_line(aes(x = log_tdh, y = .fitted), 
+            size = 1, 
+            color = colorc, 
+            data = predicted.distance) + 
+  geom_ribbon(aes(x = log_tdh, 
+                  ymin = .fitted - 1.96 * .se.fit, 
+                  ymax = .fitted + 1.96 * .se.fit), 
+              fill = colorc, 
+              data = predicted.distance, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(-2, 5), breaks = c(-2, 0, 2, 4)) +  
+  scale_x_continuous(breaks = c(3, 4, 5)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Highway Disturbance [ln(vehicles/day/m)]") +
+  ylab("Number of Webs [ln()]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        legend.position = "none") + 
+  annotate(geom = "text", x = 4, y = 5, label = "*", color = "black", size = 4) 
+nd <- data.frame(log_TotalSub = mean(sites_wrangled$log_TotalSub), 
+                 log_tdh = seq(2.7, 5.5, 0.03))
+predicted.distance <- augment(top_model_webs_o, 
+                              newdata = nd, 
+                              se_fit = TRUE)
+webs_tdh <- ggplot(sites_wrangled, aes(x = log_tdh, y = log(NumWebs))) + 
+  geom_point(aes(color = Location), alpha = 0.7, 
+             size = 1) +
+  geom_line(aes(x = log_tdh, y = .fitted), 
+            size = 1, 
+            color = coloro, 
+            data = predicted.distance) + 
+  geom_ribbon(aes(x = log_tdh, 
+                  ymin = .fitted - 1.96 * .se.fit, 
+                  ymax = .fitted + 1.96 * .se.fit), 
+              fill = coloro, 
+              data = predicted.distance, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(-2, 5), breaks = c(-2, 0, 2, 4)) +  
+  scale_x_continuous(breaks = c(3, 4, 5)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Highway Disturbance [ln(vehicles/day/m)]") +
+  ylab("Number of Webs [ln()]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        legend.position = "none") + 
+  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = 4.8, label = "**", color = "black", size = 4)
+```
+
+```{r figure 5 spiders}
+# number of spiders
+global <- glm.nb(NumSpiders ~ log_TotalSub + log_tdr + log_tdh + spec_rad + log_patch + road_length_m, data = sites_center)
+options(na.action = "na.fail") 
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
+options(na.action = "na.omit")
+top_model_spiders_c <- get.models(model_dredge, subset = 1)[[1]]
+nd <- data.frame(log_tdh = seq(3.32, 5.42, 0.02))
+predicted.distance <- augment(top_model_spiders_c, 
+                              newdata = nd, 
+                              se_fit = TRUE)
+spiders_center_tdh <- ggplot(sites_wrangled, aes(x = log_tdh, y = log(NumSpiders))) + 
+  geom_point(aes(color = Location), alpha = 0.5, 
+             size = 1) +
+  geom_line(aes(x = log_tdh, y = .fitted), 
+            size = 1, 
+            color = colorc, 
+            data = predicted.distance) + 
+  geom_ribbon(aes(x = log_tdh, 
+                  ymin = .fitted - 1.96 * .se.fit, 
+                  ymax = .fitted + 1.96 * .se.fit), 
+              fill = colorc, 
+              data = predicted.distance, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(-2, 5), breaks = c(-2, 0, 2, 4)) +  
+  scale_x_continuous(breaks = c(3, 4, 5)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Highway Disturbance [ln(vehicles/day/m)]") +
+  ylab("Number of Spiders [ln()]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        legend.position = "none") + 
+  annotate(geom = "text", x = 4, y = 5, label = "*", color = "black", size = 4) 
+nd <- data.frame(log_TotalSub = mean(sites_wrangled$log_TotalSub), 
+                 log_tdh = seq(2.7, 5.5, 0.03))
+predicted.distance <- augment(top_model_spiders_o, 
+                              newdata = nd, 
+                              se_fit = TRUE)
+spiders_tdh <- ggplot(sites_wrangled, aes(x = log_tdh, y = log(NumSpiders))) + 
+  geom_point(aes(color = Location), alpha = 0.7, 
+             size = 1) +
+  geom_line(aes(x = log_tdh, y = .fitted), 
+            size = 1, 
+            color = coloro, 
+            data = predicted.distance) + 
+  geom_ribbon(aes(x = log_tdh, 
+                  ymin = .fitted - 1.96 * .se.fit, 
+                  ymax = .fitted + 1.96 * .se.fit), 
+              fill = coloro, 
+              data = predicted.distance, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(-2, 5), breaks = c(-2, 0, 2, 4)) +  
+  scale_x_continuous(breaks = c(3, 4, 5)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Highway Disturbance [ln(vehicles/day/m)]") +
+  ylab("Number of Spiders [ln()]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        legend.position = "none") + 
+  annotate(geom = "text", x = min((predicted.distance$log_tdh)) + diff(range((predicted.distance$log_tdh)))/2, y = 5, label = "*", color = "black", size = 4)
+```
+
+```{r figure 5 neighbor}
+# nearest neighbor distance 
+near_center <- nearest %>% 
+  filter(Location == "Urban Center")
+global <- glm.nb(round(RetreatDist, 0) ~ log_TotalSub + log_tdr + log_tdh + spec_rad + log_patch + road_length_m, data = near_center)
+options(na.action = "na.fail") 
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
+options(na.action = "na.omit") 
+top_model_neighbor_c <- get.models(model_dredge, subset = 1)[[1]]
+nd <- data.frame(road_length_m = seq(47, 117, 0.6))
+predicted.distance <- augment(top_model_neighbor_c, 
+                              newdata = nd, 
+                              se_fit = TRUE)
+dist_center_road <- ggplot(neighbors_wrangled, aes(x = (road_length_m), y = log(RetreatDist))) + 
+  geom_point(aes(color = Location), alpha = 0.5, 
+             size = 1) +
+  geom_line(aes(x = (road_length_m), y = (.fitted)), 
+            size = 1, 
+            color = colorc, 
+            data = predicted.distance) + 
+  geom_ribbon(aes(x = (road_length_m), 
+                  ymin = .fitted - 1.96 * .se.fit, 
+                  ymax = .fitted + 1.96 * .se.fit), 
+              fill = colorc, 
+              data = predicted.distance, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(2, 7), breaks = c(2, 3, 4, 5, 6, 7)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Total Road Length [m]") +
+  ylab("Distance from Focal Web \nto Neighbor Web [ln(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        legend.position = "none") + 
+  annotate(geom = "text", x = 55, y = 6.8, label = "*", color = "black", size = 4)
+```
+
+```{r figure 5 height}
+# web height
+webs_wrangled$road_length_m_sc <- scale(webs_wrangled$road_length_m, center = FALSE)
+webs_center <- webs_wrangled %>% 
+  filter(Location == "Urban Center")
+global <- glmer.nb(round(RetreatHeight, 0) ~ log_TotalSub + log_tdr + log_tdh + scale(spec_rad, center = FALSE) + log_patch + road_length_m_sc + (1 | ID), data = webs_center)#, control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e4)))
+options(na.action = "na.fail") # Required for dredge to run
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
+options(na.action = "na.omit") # set back to default
+top_model_height_c <- get.models(model_dredge, subset = 1)[[1]]
+predictions <- expand.grid(log_TotalSub = mean(webs_center$log_TotalSub),
+                           road_length_m_sc = seq(0.5, 1.50, 0.01))
+predictions$response <- predict(top_model_height_c, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+bigBoot_height_center_road_nb <- bootMer(top_model_height_c, BootFunc, nsim = 1000)
+predSE <- t(apply(bigBoot_height_center_road_nb$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+height_center_road <- ggplot(webs_wrangled, aes(x = road_length_m_sc, y = log(RetreatHeight))) + 
+  geom_point(aes(color = Location), alpha = 0.5, 
+             size = 1) +
+  geom_line(aes(x = road_length_m_sc, y = log(response)), 
+            size = 1, 
+            color = colorc, 
+            data = predictions) + 
+  geom_ribbon(aes(x = road_length_m_sc, 
+                  ymin = log(response - 1.96 * SE), 
+                  ymax = log(response + 1.96 * SE)), 
+              fill = colorc, 
+              data = predictions, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(-2.5, 6), breaks = c(-2, 0, 2, 4, 6)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +  theme_classic() +
+  xlab("Plant Species Richness [ln()]") +
+  ylab("Web Height [ln(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        legend.position = "none") + 
+  annotate(geom = "text", x = 0.9, y = 5.8, label = "N.S.", color = "black", size = 3)
+
+predictions <- expand.grid(log_TotalSub = mean(webs_wrangled$log_TotalSub),
+                           log_tdr = seq(2.73, 7.22, 0.05))
+predictions$response <- predict(top_model_height_o, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+bigBoot_height_overall_tdr_nb <- bootMer(top_model_height_o, BootFunc, nsim = 1000)
+predSE <- t(apply(bigBoot_height_overall_tdr_nb$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+height_tdr <- ggplot(webs_wrangled, aes(x = log_tdr, y = log(RetreatHeight))) + 
+  geom_point(aes(color = Location), alpha = 0.7, 
+             size = 1) +
+  geom_line(aes(x = log_tdr, y = log(response)), 
+            size = 1, 
+            color = coloro, 
+            data = predictions) + 
+  geom_ribbon(aes(x = log_tdr, 
+                  ymin = log(response - 1.96 * SE), 
+                  ymax = log(response + 1.96 * SE)), 
+              fill = coloro, 
+              data = predictions, 
+              inherit.aes = FALSE, 
+              alpha = 0.25) +
+  scale_y_continuous(limits = c(-2.5, 6), breaks = c(-2, 0, 2, 4, 6)) +  
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  theme_classic() +
+  xlab("Road Disturbance [ln(vehicles/day/m)]") +
+  ylab("Web Height [ln(cm)]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(), 
+        legend.position = "none") + 
+    annotate(geom = "text", x = min(predictions$log_tdr) + diff(range(predictions$log_tdr))/2, y = 5.8, label = "N. S.", color = "black", size = 3)
+```
+
+```{r figure 5 panel}
+webs_text <- as_ggplot(text_grob(paste("Number of \nWebs \n[ln()]"), size = 10))
+spiders_text <- as_ggplot(text_grob(paste("Number of \nSpiders \n[ln()]"), size = 10))
+dist_text <- as_ggplot(text_grob(paste("Nearest \nNeighbor \nDist. [ln(cm)]"), size = 10))
+height_text <- as_ggplot(text_grob(paste("Web \nHeight \n[ln(cm)]"), size = 10))
+tdr_text <- as_ggplot(text_grob(paste("Road-Traffic \nImpact \n[ln(cars/day/m)]"), size = 10))
+tdh_text <- as_ggplot(text_grob(paste("Highway-Traffic \nImpact \n[ln(cars/day/m)]"), size = 10))
+road_text <- as_ggplot(text_grob(paste("Road \nLength [m]"), size = 10))
+overall_text <- as_ggplot(text_grob(paste("Overall"), size = 10))
+center_text <- as_ggplot(text_grob(paste("Urban Center Subset"), size = 10))
+blankPlot <- ggplot()+geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing() 
+greyPlot <- ggplot()+geom_blank(aes(1,1)) + 
+  cowplot::theme_nothing() +
+  theme(panel.background = element_rect(fill = "grey", color = "white"))
+
+pred_traffic <- ggarrange(webs_text, greyPlot, webs_tdh, blankPlot, webs_center_tdh, greyPlot,
+                spiders_text, greyPlot, spiders_tdh, blankPlot, spiders_center_tdh, greyPlot, 
+                dist_text, greyPlot, greyPlot, blankPlot, greyPlot, dist_center_road, 
+                height_text, height_tdr, greyPlot, blankPlot, greyPlot, height_center_road,
+                blankPlot, tdr_text, tdh_text, blankPlot, tdh_text, road_text,
+                ncol = 6, nrow = 5, 
+                widths = c(0.16, 0.20, 0.20, 0.04, 0.20, 0.20), 
+                heights = c(0.22, 0.22, 0.22, 0.22, 0.12))
+
+jpeg(filename = "figures/figure5.jpeg", units = "cm", width = 17.4, height = 17.4, res = 300)
+print(pred_traffic)
+dev.off()
+pred_traffic
+```
+
+**Fig. 5** Significant correlations between abundance, aggregation, and position measures and the environmental predictors relating to traffic impacts for the data overall (black outline) and the urban center subset (orange outline). Grey boxes represent environmental predictors that were dropped from models after AIC model selection. The regression lines and shaded regions represent the predictions and 95% confidence intervals (respectively) from the top negative binomial generalized linear model after AIC selection. The points represent the raw data (orange = urban center, green = urban forest). Road length for web height was scaled without centering. Asterisks indicate significance level (*** P < 0.001; ** P < 0.01; * P < 0.05, N. S. = not significant).
+
+# Figure S11
+
+```{r figure s11 search}
+search_land.nb <- glm.nb(WalkDist ~ Land, data = sites_wrangled)
+nd <- data.frame(Land = factor(levels(sites_wrangled$Land)))
+predictions <- augment(search_land.nb, newdata = nd, se_fit = TRUE, type.predict = "response")
+predictions <- predictions %>% 
+  rename("rate" = ".fitted", "SE" = ".se.fit")
+search_land_plot <- ggplot(sites_wrangled, aes(x = Land, y = WalkDist)) + 
+  geom_jitter(color = "grey", width = 0.1, size = 0.5) +
+  geom_point(aes(x = Land, y = rate, color = Land), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Land, 
+                  ymin = rate - SE, 
+                  ymax = rate + SE, color = Land), data = predictions, inherit.aes = FALSE, width = 0.25, size = 1) +
+  theme_classic() +
+  scale_color_manual(values = c("Deciduous Forest" = "#1b9e77", "Woody Wetlands" = "#1b9e77", "Urban, High" = "#d95f02", "Urban, Medium" = "#d95f02", "Urban, Low" = "#d95f02")) +
+  xlab("Land Cover Class") +
+  ylab("Search Distance [m]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x=element_text(colour="black", size=10)) + 
+  theme(axis.text.y=element_text(colour="black", size=10)) +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+```
+
+```{r figure s11 webs}
+webs_land_nb <- glm.nb(NumWebs ~ Land, data = sites_wrangled)
+nd <- data.frame(Land = factor(levels(sites_wrangled$Land)))
+predictions <- augment(webs_land_nb, newdata = nd, se_fit = TRUE, type.predict = "response")
+predictions <- predictions %>% 
+  rename("rate" = ".fitted", "SE" = ".se.fit")
+webs_land_plot <- ggplot(sites_wrangled, aes(x = Land, y = NumWebs)) + 
+  geom_jitter(color = "grey", width = 0.1, size = 0.5) +
+  geom_point(aes(x = Land, y = rate, color = Land), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Land, 
+                  ymin = rate - SE, 
+                  ymax = rate + SE, color = Land), data = predictions, inherit.aes = FALSE, width = 0.25, size = 1) +
+  theme_classic() +
+  scale_color_manual(values = c("Deciduous Forest" = "#1b9e77", "Woody Wetlands" = "#1b9e77", "Urban, High" = "#d95f02", "Urban, Medium" = "#d95f02", "Urban, Low" = "#d95f02")) +
+  xlab("Land Cover Class") +
+  ylab("Number of Webs") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x=element_text(colour="black", size=10)) + 
+  theme(axis.text.y=element_text(colour="black", size=10)) +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+```
+
+```{r figure s11 spiders}
+spiders_land_nb <- glm.nb(NumSpiders ~ Land, data = sites_wrangled)
+nd <- data.frame(Land = factor(levels(sites_wrangled$Land)))
+predictions <- augment(spiders_land_nb, newdata = nd, se_fit = TRUE, type.predict = "response")
+predictions <- predictions %>% 
+  rename("rate" = ".fitted", "SE" = ".se.fit")
+spiders_land_plot <- ggplot(sites_wrangled, aes(x = Land, y = NumSpiders)) + 
+  geom_jitter(color = "grey", width = 0.1, size = 0.5) +
+  geom_point(aes(x = Land, y = rate, color = Land), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Land, 
+                  ymin = rate - SE, 
+                  ymax = rate + SE, color = Land), data = predictions, inherit.aes = FALSE, width = 0.25, size = 1) +
+  theme_classic() +
+  scale_color_manual(values = c("Deciduous Forest" = "#1b9e77", "Woody Wetlands" = "#1b9e77", "Urban, High" = "#d95f02", "Urban, Medium" = "#d95f02", "Urban, Low" = "#d95f02")) +
+  xlab("Land Cover Class") +
+  ylab("Number of Spiders") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x=element_text(colour="black", size=10)) + 
+  theme(axis.text.y=element_text(colour="black", size=10)) +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+```
+
+```{r figure s11 neighbor}
+dist_land_nb <- glm.nb(round(RetreatDist, 0) ~ Land, data = nearest)
+nd <- data.frame(Land = factor(levels(nearest$Land)))
+predictions <- augment(dist_land_nb, newdata = nd, se_fit = TRUE, type.predict = "response")
+predictions <- predictions %>% 
+  rename("response" = ".fitted", "SE" = ".se.fit")
+dist_land_plot <- ggplot(nearest, aes(x = Land, y = RetreatDist)) + 
+  geom_jitter(color = "grey", width = 0.1, size = 0.5) +
+  geom_point(aes(x = Land, y = response, color = Land), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Land, 
+                  ymin = response - SE, 
+                  ymax = response + SE, color = Land), data = predictions, inherit.aes = FALSE, width = 0.25, size = 1) +
+  theme_classic() +
+  scale_color_manual(values = c("Deciduous Forest" = "#1b9e77", "Woody Wetlands" = "#1b9e77", "Urban, High" = "#d95f02", "Urban, Medium" = "#d95f02", "Urban, Low" = "#d95f02")) +
+  xlab("Land Cover Class") +
+  ylab("Distance from Focal \nWeb to Neighbor Web [cm]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x=element_text(colour="black", size=10)) + 
+  theme(axis.text.y=element_text(colour="black", size=10)) +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+```
+
+```{r figure s11 height}
+height_land_nb <- glmer.nb(round(RetreatHeight, 0) ~ Land + (1 | ID), data = webs_wrangled)
+predictions <- expand.grid(Land = levels(factor(webs_wrangled$Land)))
+predictions$response <- predict(height_land_nb, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+bigBoot_height_land_nb <- bootMer(height_land_nb, BootFunc, nsim = 1000)
+predSE <- t(apply(bigBoot_height_land_nb$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+height_land_plot <- ggplot(webs_wrangled, aes(x = Land, y = RetreatHeight)) + 
+  geom_jitter(color = "grey", width = 0.1, size = 0.5) +
+  geom_point(aes(x = Land, y = response, color = Land), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Land, 
+                  ymin = response - SE, 
+                  ymax = response + SE, color = Land), data = predictions, inherit.aes = FALSE, width = 0.25, size = 1) +
+  theme_classic() +
+  scale_color_manual(values = c("Deciduous Forest" = "#1b9e77", "Woody Wetlands" = "#1b9e77", "Urban, High" = "#d95f02", "Urban, Medium" = "#d95f02", "Urban, Low" = "#d95f02")) +
+  xlab("Land Cover Class") +
+  ylab("Web Height [cm]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x=element_text(colour="black", size=10)) + 
+  theme(axis.text.y=element_text(colour="black", size=10)) +
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1))
+```
+
+```{r figure s11 panel}
+land_plots <- ggarrange(search_land_plot, ggarrange(webs_land_plot, spiders_land_plot, dist_land_plot, height_land_plot, labels = c("b", "c", "d", "e"), ncol = 2, nrow = 2, legend = "none", align = "hv"), labels = c("a"), widths = c(0.3, 0.7))
+
+gt <- arrangeGrob(webs_land_plot, spiders_land_plot,
+             search_land_plot, dist_land_plot, 
+             height_land_plot,
+             ncol = 3, nrow = 2, 
+             layout_matrix = rbind(c(1, 2, 5), c(3, 4, 5)))
+
+land_plots <- as_ggplot(gt) +                                # transform to a ggplot
+  draw_plot_label(label = c("a", "c", "b", "d", "e"), size = 15,
+                  x = c(0, 0, 0.33, 0.33, 0.66), y = c(1, 0.5, 1, 0.5, 1))
+
+jpeg(filename = "figures/figureS11.jpeg", units = "cm", width = 17.4, height = 17.4, res = 300)
+print(land_plots)
+dev.off()
+land_plots
+```
+
+**Fig. S11** Comparison of the number of webs (a) and spiders (b) in a 10-meter radius of the focal web, search distance (c), the distance from the focal web to the first nearest neighbor (d), and web height (e) by land cover class - urban high-intensity, urban medium-intensity, urban low-intensity, deciduous forest, woody wetlands. Land cover class was determined using the pixel category from the 2019 National Land Cover Data that the focal web site resides in. Grey jittered points represent the raw data while colored points (orange = urban center, green = urban forest) and error bars represent the mean and standard error, respectively, from negative binomial generalized linear model predictions. See table S3 for statistical analysis
+
+# Figure S12
+
+```{r figure s12}
+substrates_plot <- substrates %>% 
+  mutate(Location = fct_recode(Location, "Urban Center" = "Campus", "Urban Forest" = "Forest"),
+         Location = fct_relevel(Location, "Urban Center", "Urban Forest")) %>% 
+  ggplot(aes(x = Location, y = Number, fill = factor(Type, levels=c("Cement", "Metal", "Plastic", "Rocks", "Herb", "Litter", "Shrub", "Tree", "Vine")))) + 
+  geom_bar(position = "fill",stat = "identity", alpha=1.0) + 
+  scale_y_continuous(labels = scales::percent_format()) + 
+  theme(axis.title.x = element_blank()) + 
+  xlab("Collection Location") +
+  ylab("Percent of Web Substrates") + 
+  theme_classic() +
+  theme(text = element_text(size = 10)) + 
+  scale_fill_manual(values = c("#D94701", "#FD8D3C", "#FDBE85", "#FEEDDE", "#006D2C", "#31A354", "#74C476", "#BAE4B3", "#EDF8E9"), 
+                    labels = c("Cement", "Metal", "Plastic", "Rocks", "Herb", "Litter", "Shrub", "Tree", "Vine")) + 
+  labs(fill="Substrate Material") + 
+  theme(axis.text.x=element_text(colour="black", size=10)) + 
+  theme(axis.text.y=element_text(colour="black", size=10)) +
+  theme(legend.text=element_text(size=10))
+jpeg(filename = "figures/figureS12.jpeg", units = "cm", width = 17.4, height = 17.4, res = 300)
+print(substrates_plot)
+dev.off()
+substrates_plot
+```
+
+**Fig. S12** Representation of web substrates by class. Orange indicates non-plant materials and green shades indicate plant material classes.

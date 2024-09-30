@@ -1,0 +1,391 @@
+---
+title: "Tables for Publication"
+author: "Brandi Pessman"
+date: "2024-09-30"
+output: html_document
+---
+# Set the Working Directory and Global Code Chunk Options
+
+I have set message, warning, and echo to FALSE for every chunk so the knitted
+document does not include messages, warnings, or code.
+
+```{r setup, message = FALSE, warning = FALSE, echo = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation")
+```
+
+# Packages Loaded
+
+```{r packages}
+library(tidyverse) # wrangling data
+library(flextable) # making tables
+library(ggpubr) # using ggarrange to make multi-panel figures
+```
+
+# Import Data 
+
+```{r import, include = FALSE}
+land_cover <- read.table(file = "data/land_cover_table.txt", header = TRUE) # for land cover table
+pred_table_nb <- read.table(file = "data/pred_table_nb.txt", header = TRUE) # for predictor stats table
+site_info <- read.table(file = "data/site_info.txt", header = TRUE) # for site information table
+pred_table_avg_nb <- read.table(file = "data/pred_table_avg_nb.txt", header = TRUE) # for predictor stats table
+
+```
+
+# Table 1
+
+**Table 1** Landscape variables for the urban center (UNL City Campus), the urban forest (Wilderness Park), and Lincoln (Nebraska, USA) city limits, collected from the National Land Cover Database (2016 Tree Cover, 2019 Impervious Cover, 2019 Land Cover) using QGIS (v. 3.16.3-Hannover, ESRI 102704). The National Land Cover Database assigned the intensity of urban cover based on percent impervious cover (High = 80–100%, Medium = 50–79%, Low = 20–49%, Open Space = 0–19% (https://www.mrlc.gov/data/legends/national- land-cover-database-class-legend-and-description)
+
+```{r table 1}
+rownames(land_cover) <- c("Area (sq. km)", "Impervious Cover (%)", "Tree Cover (%)", "Urban Cover (%)", "Urban, High Intensity (%)", "Urban, Medium Intensity (%)", "Urban, Low Intensity (%)", "Urban, Open Space (%)", "Forest Cover (%)", "Deciduous Forest (%)", "Mixed Forest (%)", "Evergreen Forest (%)", "Woody Wetlands (%)", "Other Cover (%)", "Herbaceous Wetlands (%)", "Grassland Herbaceous (%)", "Pasture (%)", "Cultivated Crop (%)", "Open Water (%)")
+names <- rownames(land_cover)
+rownames(land_cover) <- seq(1:nrow(land_cover))
+land_cover <- cbind(names, land_cover)
+colnames(land_cover) <- c(" ", "Urban Center \n(UNL City Campus)", "Urban Forest \n(Wilderness Park)", "Lincoln City Limits")
+flextable(land_cover[ ,1:4]) %>% 
+  autofit() %>% 
+  hline(i = c("3", "4", "8", "9", "13", "14"), part = "body") %>% 
+  bg(i = c("4", "9", "14"), bg = "grey95") %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  set_caption("") %>% 
+  save_as_image(path = here::here("tables/table1.png"))
+```
+
+# Table 2
+
+**Table 2** Mean and standard error of the collected environmental predictors by habitat. Percent impervious and tree cover, spectral radiance, artificial night sky radiance, and total road length were collected in a 100-m buffer of each focal web, while plant species richness was recorded in a 10-m buffer of each focal web. We used the nearest road or highway for traffic impact measures. Patch area was defined as the area of continuous vegetation that includes the focal web
+
+```{r table 2}
+mean_se1 <- c("Mean ± Std. Error", "Urban Forest \n(Wilderness Park)", "1.27 ± 0.36", "47.15 ± 3.46", "137.44 ± 3.71", "5.89 ± 0.91", "13.30 ± 1.56", "46,295 ± 11,128", "104 ± 36", "35.6 ± 6.04", "15.67 ± 7.54")
+mean_se2 <- c("Mean ± Std. Error", "Urban Center \n(UNL City Campus)", "76.52 ± 2.63", "1.58 ± 0.37", "153.39 ± 3.58", "116.90 ± 9.39", "3.33 ± 0.58", "654 ± 144", "398 ± 125", "65.0 ± 9.82", "93.03 ± 40.60")
+pred_location <- data.frame(mean_se2, mean_se1)
+rownames(pred_location) <- c("", " ", "Percent Impervious Cover [%]", "Percent Tree Cover [%]", "Spectral Radiance [Watts/(m² * sr * µm)]", "Artificial Night Sky Radiance [mcd/m²]", "Plant Species Richness", "Patch Area [m²]", "Road-Traffic Impact [vehicles/day/m]", "Highway-Traffic Impact [vehicles/day/m]", "Total Road Length [m]")
+names <- rownames(pred_location)
+rownames(pred_location) <- seq(1:nrow(pred_location))
+pred_location <- cbind(names, pred_location)
+colnames(pred_location) <- c(" ", "Mean ± Std. Error", "Mean ± Std. Error")
+flextable(pred_location[ ,1:3]) %>% 
+  delete_part(part = "header") %>% 
+  autofit() %>% 
+  merge_h(part = "body") %>% 
+  bold(bold = TRUE,i = c("1", "2"), part = "body") %>% 
+  hline(i = c("1", "2", "11"), part = "body", border = officer::fp_border(width = 2)) %>% 
+  hline_top(part = "body", border = officer::fp_border(width = 2)) %>% 
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  set_caption("") %>% 
+  save_as_image(path = here::here("tables/table2.png"))
+```
+
+# Table 3
+
+**Table 3** Results of the top models after AIC model selection from negative binomial generalized linear models with the environmental predictors for data overall and subset by habitat (urban center and urban forest). Asterisks indicate significance level (*** P < 0.001; ** P < 0.01; * P < 0.05; P < 0.10)
+
+```{r table 3}
+pred_table_nb <- pred_table_nb %>% 
+  mutate(Variable = factor(Variable),
+         Variable = fct_recode(Variable, "Number of Webs" = "NumWebs",
+                               "Number of Spiders" = "NumSpiders",
+                               "Nearest Neighbor Distance" = "RetreatDist",
+                               "Web Height" = "RetreatHeight"),
+         Predictor = factor(Predictor),
+         Predictor = fct_recode(Predictor, "Plant Species Richness" = "plant",
+                                "Road-Traffic Impact" = "tdr",
+                                "Highway-Traffic Impact" = "tdh",
+                                "Total Road Length" = "road",
+                                "Percent Tree Cover" = "tree",
+                                "Proportion Tree Cover" = "tree_frac",
+                                "Total Road Length (Scaled)" = "road_scale"),
+         Estimate = round(Estimate, 3),
+         SE = round(SE, 3),
+         Z = round(Z, 3),
+         P = round(P, 3),
+         R = round(R, 3),
+         AICc = round(AICc, 3))
+
+pred_table_nb[pred_table_nb == 0] <- ""
+
+pred_table_nb <- pred_table_nb %>% 
+  mutate(P = fct_recode(P, "< 0.001 ***" = "0.001",
+                        "   0.003 **" = "0.003",
+                        "   0.005 **" = "0.005",
+                        "   0.009 **" = "0.009",
+                        "   0.010 **" = "0.01",
+                        "   0.012 *" = "0.012",
+                        "   0.013 *" = "0.013",
+                        "   0.027 *" = "0.027",
+                        "   0.058 ." = "0.058",
+                        "   0.076 ." = "0.076",
+                        "   0.086 ." = "0.086"))
+
+colnames(pred_table_nb) <- c('Variable','Model','Predictor', 'Estimate', 'Standard \nError', 'Z-Value', 'P-Value', 'McFadden\'s \nR²', 'AICc \nWeight')
+
+flextable(pred_table_nb[ , 1:9]) %>% 
+  autofit() %>% 
+  merge_v(j = c('Variable', 'Model', 'McFadden\'s \nR²', 'AICc \nWeight'), part = "body") %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  hline_bottom(part = "body", border = officer::fp_border(width = 2)) %>% 
+  #border(j = 'Variable', border.bottom = officer::fp_border(width = 2)) %>% 
+  hline(i = c("4", "8", "11"), part = "body", border = officer::fp_border(width = 2)) %>%     
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  valign(valign = "top", part = "all") %>% 
+  set_caption("") %>% 
+  footnote(i = c(1:3, 5:7, 9, 12:14), j = 3, value = as_paragraph(
+    c("Predictors that were natural log-transformed prior to model evaluation. Estimate and standard errors were not back transformed.")), 
+    ref_symbols = c("a"), part = "body") %>% 
+      footnote(i = 15, j = 3, value = as_paragraph(
+    c("Total road length was scaled (without centering) by dividing each value of road length by the root mean square prior to model evaluation to avoid model convergence issues.")),
+    ref_symbols = c("b"), part = "body") %>% 
+    footnote(i = 16, j = 3, value = as_paragraph(
+    c("Tree cover was assessed as proportion (value from 0 to 1) rather than a percent (values 0 to 100) to avoid model convergence issues.")), 
+    ref_symbols = c("c"), part = "body") %>% 
+  save_as_image(path = here::here("tables/table3.png"))
+```
+
+# Table S1
+
+**Table S1** Geographical information for the University of Nebraska-Lincoln (UNL) City Campus and Wilderness Park Sites
+
+```{r table s1}
+site_info <- site_info %>% 
+  mutate(Location = fct_recode(Location, "UNL City Campus - Urban Center" = "Campus", "Wilderness Park - Urban Forest" = "Forest"))
+colnames(site_info) <- c("Location", "Site ID", "Date", "Start Latitude", "Start Longitude", "Focal Web Latitude", "Focal Web Longitude", "Search Direction")
+flextable(site_info[ ,1:8]) %>% 
+  merge_v(j = "Location") %>% 
+  autofit(part = "body") %>% 
+  hline(i = c("12"), part = "body") %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  set_caption("") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  fix_border_issues(part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  save_as_image(path = here::here("tables/tableS1.png"))
+```
+
+# Table S3
+
+**Table S3** Statistical results of Likelihood Ratio Tests (a) following negative binomial generalized linear models (mixed effects model for web height with site ID as a random effect) for each response variable by land cover class. We performed multiple comparisons (Tukey’s all-pair) for variables that significantly differed by land cover class (b-e) where the asterisks in the grey boxes show comparisons that significantly differed. Significance indicated by asterisks (*** P < 0.001; ** P < 0.01; * P < 0.05, . P < 0.10).
+
+```{r table s3}
+Variable <- c("Number of Webs", "Number of Spiders", "Search Distance", "Neares Neighbor Distance", "Web Height")
+Chi <- c(19.134, 10.913, 6.37, 40.757, 12.569)
+df <- c("4, 21", "4, 21", "4, 21", "4, 20", "4, 130")
+P <- c("< 0.001 ***", "  0.028 *", "  0.173", "< 0.001 ***", "  0.014 *")
+land_stats <- data.frame(Variable, Chi, df, P)
+colnames(land_stats) <- c('Variable','Likelihood Ratio \nChi-Squared','Degrees of Freedom', 'P-Value')
+
+flextable(land_stats[ , 1:4]) %>% 
+  autofit() %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  valign(valign = "top", part = "all") %>% 
+  set_caption("")
+
+land_stat_table <- ggtexttable(land_stats, rows = NULL,
+            theme = ttheme("blank")) %>% 
+            tab_add_hline(at.row = c(1, 2), row.side = "top", linewidth = 3, linetype = 1) %>%
+            tab_add_hline(at.row = 6, row.side = "bottom", linewidth = 3, linetype = 1)
+
+webs_land_table <- data.frame(UH = c("", "", "", "", ""),
+                              UM = c("", "", "", "", ""),
+                              UL = c("", "", "", "", ""),
+                              DF = c("*", "**", ".", "", ""),
+                              WW = c(".", "*", ".", "", ""))
+colnames(webs_land_table) <- c("Urban, High", "Urban, Medium", "Urban, Low", "Deciduous Forest", "Woody Wetlands")
+rownames(webs_land_table) <- c("Urban, High", "Urban, Medium", "Urban, Low", "Deciduous Forest", "Woody Wetlands")
+
+webs_land_table2 <- ggtexttable(webs_land_table,
+            theme = ttheme("blank", 
+                           rownames.style = rownames_style(color = "black", face = "plain", size = 10, fill = "white"),
+                           colnames.style = colnames_style(color = "black", face = "plain", size = 10, fill = "white"),
+                           tbody.style = tbody_style(color = "black", face = "plain", size = 12, fill = "white")))
+
+webs_land_table2 <- webs_land_table2 %>% 
+  tab_add_hline(at.row = c(1, 2), row.side = "top", linewidth = 3, linetype = 1) %>%
+  tab_add_hline(at.row = 6, row.side = "bottom", linewidth = 3, linetype = 1) %>%
+  tab_add_vline(at.column = 2, column.side = "left", from.row = 1, linewidth = 3, linetype = 1) %>% 
+  table_cell_bg(row = 2, column = c(3:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 3, column = c(4:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 4, column = c(5:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 5, column = 6, linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  tab_add_title(text = "     Number of Webs", face = "bold", size = 10) 
+
+spiders_land_table <- data.frame(UH = c("", "", "", "", ""),
+                              UM = c("", "", "", "", ""),
+                              UL = c("", "", "", "", ""),
+                              DF = c("", "", "", "", ""),
+                              WW = c("", "", "", "", ""))
+colnames(spiders_land_table) <- c("Urban, High", "Urban, Medium", "Urban, Low", "Deciduous Forest", "Woody Wetlands")
+rownames(spiders_land_table) <- c("Urban, High", "Urban, Medium", "Urban, Low", "Deciduous Forest", "Woody Wetlands")
+
+spiders_land_table2 <- ggtexttable(spiders_land_table,
+            theme = ttheme("blank", 
+                           rownames.style = rownames_style(color = "black", face = "plain", size = 10, fill = "white"),
+                           colnames.style = colnames_style(color = "black", face = "plain", size = 10, fill = "white"),                           tbody.style = tbody_style(color = "black", face = "plain", size = 12, fill = "white")))
+
+spiders_land_table2 <- spiders_land_table2 %>% 
+  tab_add_hline(at.row = c(1, 2), row.side = "top", linewidth = 3, linetype = 1) %>%
+  tab_add_hline(at.row = 6, row.side = "bottom", linewidth = 3, linetype = 1) %>%
+  tab_add_vline(at.column = 2, column.side = "left", from.row = 1, linewidth = 3, linetype = 1) %>% 
+  table_cell_bg(row = 2, column = c(3:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 3, column = c(4:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 4, column = c(5:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 5, column = 6, linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  tab_add_title(text = "      Number of Spiders", face = "bold", size = 10) 
+
+dist_land_table <- data.frame(UH = c("", "", "", "", ""),
+                              UM = c("", "", "", "", ""),
+                              UL = c("", "**", "", "", ""),
+                              DF = c("***", "*", "***", "", ""),
+                              WW = c("**", "", "***", "", ""))
+colnames(dist_land_table) <- c("Urban, High", "Urban, Medium", "Urban, Low", "Deciduous Forest", "Woody Wetlands")
+rownames(dist_land_table) <- c("Urban, High", "Urban, Medium", "Urban, Low", "Deciduous Forest", "Woody Wetlands")
+
+dist_land_table2 <- ggtexttable(dist_land_table,
+            theme = ttheme("blank", 
+                           rownames.style = rownames_style(color = "black", face = "plain", size = 10, fill = "white"),
+                           colnames.style = colnames_style(color = "black", face = "plain", size = 10, fill = "white"),                           tbody.style = tbody_style(color = "black", face = "plain", size = 12, fill = "white")))
+
+dist_land_table2 <- dist_land_table2 %>% 
+  tab_add_hline(at.row = c(1, 2), row.side = "top", linewidth = 3, linetype = 1) %>%
+  tab_add_hline(at.row = 6, row.side = "bottom", linewidth = 3, linetype = 1) %>%
+  tab_add_vline(at.column = 2, column.side = "left", from.row = 1, linewidth = 3, linetype = 1) %>% 
+  table_cell_bg(row = 2, column = c(3:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 3, column = c(4:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 4, column = c(5:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 5, column = 6, linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  tab_add_title(text = "      Nearest Neighbor Distance", face = "bold", size = 10) 
+
+height_land_table <- data.frame(UH = c("", "", "", "", ""),
+                              UM = c("", "", "", "", ""),
+                              UL = c("", "", "", "", ""),
+                              DF = c("", "*", "", "", ""),
+                              WW = c("", "", "", "", ""))
+colnames(height_land_table) <- c("Urban, High", "Urban, Medium", "Urban, Low", "Deciduous Forest", "Woody Wetlands")
+rownames(height_land_table) <- c("Urban, High", "Urban, Medium", "Urban, Low", "Deciduous Forest", "Woody Wetlands")
+
+height_land_table2 <- ggtexttable(height_land_table,
+            theme = ttheme("blank", 
+                           rownames.style = rownames_style(color = "black", face = "plain", size = 10, fill = "white"),
+                           colnames.style = colnames_style(color = "black", face = "plain", size = 10, fill = "white"),                           tbody.style = tbody_style(color = "black", face = "plain", size = 12, fill = "white")))
+
+height_land_table2 <- height_land_table2 %>% 
+  tab_add_hline(at.row = c(1, 2), row.side = "top", linewidth = 3, linetype = 1) %>%
+  tab_add_hline(at.row = 6, row.side = "bottom", linewidth = 3, linetype = 1) %>%
+  tab_add_vline(at.column = 2, column.side = "left", from.row = 1, linewidth = 3, linetype = 1) %>% 
+  table_cell_bg(row = 2, column = c(3:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 3, column = c(4:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 4, column = c(5:6), linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  table_cell_bg(row = 5, column = 6, linewidth = 0,
+                fill="lightgrey", color = "white") %>% 
+  tab_add_title(text = "      Web Height", face = "bold", size = 10) 
+
+land_tables <- ggarrange(land_stat_table, webs_land_table2, spiders_land_table2, dist_land_table2, height_land_table2, nrow = 5, labels = c("a", "b", "c", "d", "e"), font.label = list(size = 12))
+
+jpeg(filename = "tables/tableS3.jpeg", units = "cm", width = 17.4, height = 25, res = 300)
+print(land_tables)
+dev.off()
+```
+
+# Table S4
+
+**Table S4** Results of model averages (all models within 2 delta AICc points) from negative binomial generalized linear models (mixed model for web height with site ID as a random effect) with the environmental predictors for data overall and subset by habitat (urban center and urban forest), where applicable. Asterisks indicate significance level (*** P < 0.001; ** P < 0.01; * P < 0.05, . P < 0.10)
+
+```{r table s4}
+pred_table_avg_nb <- pred_table_avg_nb %>% 
+  mutate(Variable = factor(Variable),
+         Variable = fct_recode(Variable, "Number of Webs" = "NumWebs",
+                               "Number of Spiders" = "NumSpiders",
+                               "Nearest Neighbor Distance" = "RetreatDist",
+                               "Web Height" = "RetreatHeight"),
+         Predictor = factor(Predictor),
+         Predictor = fct_recode(Predictor, "Plant Species Richness" = "plant",
+                                "Road-Traffic Impact" = "tdr",
+                                "Highway-Traffic Impact" = "tdh",
+                                "Patch Area" = "patch",
+                                "Total Road Length" = "road",
+                                "Spectral Radiance" = "spec",
+                                "Percent Tree Cover" = "tree",
+                                "Proportion Tree Cover" = "tree_frac",
+                                "Spectral Radiance (Scaled)" = "spec_scale",
+                                "Total Road Length (Scaled)" = "road_scale"),
+         Model = factor(Model), 
+         Model = fct_recode(Model, "Center " = "Center2"),
+         Estimate = round(Estimate, 3),
+         SE = round(SE, 3),
+         Z = round(Z, 3),
+         P = round(P, 3),
+         AICc = round(AICc, 3))
+
+pred_table_avg_nb <- pred_table_avg_nb %>% 
+  mutate(P = factor(P),
+    P = fct_recode(P, "< 0.001 ***" = "0.001",
+                        "   0.007 **" = "0.007",
+                        "   0.009 **" = "0.009",
+                        "   0.017 *" = "0.017",
+                        "   0.019 *" = "0.019",
+                        "   0.029 *" = "0.029",
+                        "   0.033 *" = "0.033",
+                        "   0.036 *" = "0.036",
+                        "   0.039 *" = "0.039",
+                        "   0.054 ." = "0.054",
+                        "   0.055 ." = "0.055",
+                        "   0.078 ." = "0.078",
+                        "   0.086 ." = "0.086",
+                        "   0.088 ." = "0.088",
+                        "   0.092 ." = "0.092",
+                        "   0.119" = "0.119",
+                        "   0.122" = "0.122",
+                        "   0.137" = "0.137",
+                        "   0.143" = "0.143",
+                        "   0.162" = "0.162",
+                        "   0.301" = "0.301")) 
+
+colnames(pred_table_avg_nb) <- c('Variable','Model','Predictor', 'Estimate', 'Adj. Standard \nError', 'Z-Value', 'P-Value', 'AICc \nWeight')
+
+#saveRDS(pred_table_avg, file = "manuscript/figures/pred_table_avg.Rds")
+
+flextable(pred_table_avg_nb[ , 1:8]) %>% 
+  autofit() %>% 
+  merge_v(j = c('Variable', 'Model', 'AICc \nWeight'), part = "body") %>% 
+  bold(bold = TRUE, part = "header") %>% 
+  hline_bottom(part = "body", border = officer::fp_border(width = 2)) %>% 
+  #border(j = 'Variable', border.bottom = officer::fp_border(width = 2)) %>% 
+  hline(i = c("1", "4", "8"), part = "body", border = officer::fp_border(width = 2)) %>%   
+  fix_border_issues(part = "all") %>% 
+  fontsize(size = 10, part = "all") %>% 
+  align(align = "center", part = "all") %>% 
+  valign(valign = "top", part = "all") %>% 
+  set_caption("") %>% 
+  footnote(i = c(1:3, 5:6, 9:13, 15:16, 19:20), j = 3, value = as_paragraph(
+    c("Predictors that were natural log-transformed prior to model evaluation. Estimate and standard errors were not back transformed.")), 
+    ref_symbols = c("a"), part = "body") %>% 
+  footnote(i = c(14, 17), j = 3, value = as_paragraph(
+    c("Spectral radiance and total road length were scaled (without centering) by dividing each value of road length by the root mean square prior to model evaluation to avoid model convergence issues.")), 
+    ref_symbols = c("b"), part = "body") %>% 
+  footnote(i = 18, j = 3, value = as_paragraph(
+    c("Tree cover was assessed as proportion (value from 0 to 1) rather than a percent (values 0 to 100) to avoid model convergence issues.")), 
+    ref_symbols = c("c"), part = "body") %>% 
+  save_as_image(path = here::here("tables/tableS4.png"))
+```

@@ -1,0 +1,107 @@
+---
+title: "Environmental predictors of spider spatial patterns "
+author: "Brandi Pessman"
+date: "`r Sys.Date()`"
+output: html_document
+---
+# Setting the Working Directory and Global Code Chunk Options
+
+I have set message and warning to FALSE for every chunk so the knitted document does not include messages and warnings. 
+
+```{r setup}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation")
+```
+
+# Packages to Load
+
+```{r packages}
+library(tidyverse) # for making graphs
+library(pander) # viewing AIC comparisons between models
+library(AICcmodavg) # also helps viewing AIC comparisons
+library(MuMIn) # to run the dredge function
+library(lme4) # to run the glmer function for the web distance (random effects)
+source('functions/AIC_function.R') # runs AIC model selection
+```
+
+# Import the Data from the wrangled_data/ folder
+
+```{r import}
+sites_wrangled <- readRDS('wrangled_data/sites_wrangled.RDS')
+neighbors_wrangled <- readRDS('wrangled_data/neighbors_wrangled.RDS')
+webs_wrangled <- readRDS('wrangled_data/webs_wrangled.RDS')
+```
+
+# Not Used: One method of model selection
+
+```{r unused}
+# This is one way to look at the overall data, but ended up not using this information
+models = list(WalkDist ~ 1,
+              WalkDist ~ log_TotalSub, 
+              WalkDist ~ log_tdr, 
+              WalkDist ~ log_tdh,
+              WalkDist ~ log_TotalSub + log_tdr,
+              WalkDist ~ log_TotalSub + log_tdh,
+              WalkDist ~ log_tdr + log_tdh,
+              WalkDist ~ log_TotalSub + log_tdr + log_tdh)
+fits = lapply(models, glm, data = sites_wrangled, family = "poisson")
+modnames = sapply(models, function(ff)deparse(ff[[3]]))
+pander(aictab(fits, modname = modnames), caption="AICc model selection table for Search Distance to the Focal Web Overall.", split.tables = Inf)
+# The top model keeps all 3 variables and no other model is within 2 Model Likelihood Units
+summary(glm(WalkDist ~ log_TotalSub + log_tdr + log_tdh, data = sites_wrangled, family = poisson))
+```
+
+# Results
+
+```{r results}
+aic_selection(y_var = "NumWebs", data = sites_wrangled)
+aic_selection(y_var = "NumSpiders", data = sites_wrangled)
+aic_selection(y_var = "round(RetreatDist, 0)", data = neighbors_wrangled)
+
+# web height
+#overall
+global <- glmer.nb(round(RetreatHeight, 0) ~ log_TotalSub + log_tdr + log_tdh + (1 | ID), data = webs_wrangled)
+options(na.action = "na.fail") # Required for dredge to run
+model_dredge <- dredge(global, beta = "none", evaluate = TRUE, rank = AICc)
+options(na.action = "na.omit") # set back to default
+top_model <- get.models(model_dredge, subset = 1)[[1]]
+summary(top_model)
+
+r.squaredGLMM(top_model) # trigamma R2m
+model.sel(model_dredge) #estimates same signs
+summary(model.avg(model_dredge, subset = delta <= 2))
+car::vif(get.models(model_dredge, 5)[[1]]) # looking for less than 2
+
+# Urban Forest
+webs_forest <- webs_wrangled %>% 
+  filter(Location == "Urban Forest") %>% 
+  mutate(tree100m_frac = I(tree100m/100))
+global <- glmer.nb(round(RetreatHeight, 0) ~ tree100m_frac + log_TotalSub + log_tdr + log_tdh + log_patch + (1 | ID), data = webs_forest, control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e4)))
+options(na.action = "na.fail") # Required for dredge to run
+model_dredge <- dredge(global, beta = "none", evaluate = TRUE, rank = AICc)
+options(na.action = "na.omit") # set back to default
+top_model <- get.models(model_dredge, subset = 1)[[1]]
+summary(top_model)
+
+r.squaredGLMM(top_model) #trigamma R2m
+model.sel(model_dredge) #estimates same signs
+summary(model.avg(model_dredge, subset = delta <= 2))
+#car::vif(get.models(model_dredge, 1)[[1]]) # looking for less than 2
+
+# Urban Center
+webs_center <- webs_wrangled %>% 
+  filter(Location == "Urban Center")
+webs_center$road_length_m_sc <- scale(webs_center$road_length_m, center = FALSE)
+global <- glmer.nb(round(RetreatHeight, 0) ~ log_TotalSub + log_tdr + log_tdh + scale(spec_rad, center = FALSE) + log_patch + road_length_m_sc + (1 | ID), data = webs_center)#, control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 2e4)))
+options(na.action = "na.fail") # Required for dredge to run
+model_dredge <- dredge(global, beta = "none", evaluate = T, rank = AICc)
+options(na.action = "na.omit") # set back to default
+top_model <- get.models(model_dredge, subset = 1)[[1]]
+summary(top_model)
+
+r.squaredGLMM(top_model) 
+model.sel(model_dredge) #estimates same signs
+summary(model.avg(model_dredge, subset = delta <= 2))
+#car::vif(get.models(model_dredge, 1)[[1]]) # looking for less than 2
+```

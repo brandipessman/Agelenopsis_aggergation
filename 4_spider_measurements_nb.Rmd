@@ -1,0 +1,711 @@
+---
+title: "Spider web abundance, patterns, and positions between habitats"
+author: "Brandi Pessman"
+date: "`r Sys.Date()`"
+output: html_document
+---
+# Setting the Working Directory and Global Code Chunk Options
+
+I have set message and warning to FALSE for every chunk so the knitted document does not include messages and warnings. 
+
+```{r setup}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, echo = FALSE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation")
+```
+
+# Packages to Load
+
+```{r packages}
+library(tidyverse) # for graphing
+library(lme4) # to run the glmer function for the web distance (random effects)
+library(glmmTMB) # for proportion test
+library(MASS) # negative binomial tests
+source('functions/residual_plots_function.R') # produces residual plots
+source('functions/model_comparison_function.R') # produces model comparison plots
+source('functions/get_predictions_function.R') #  get predictions for bootstrapping
+```
+
+# Import Data
+
+```{r import}
+sites_wrangled <- readRDS('wrangled_data/sites_wrangled.RDS')
+neighbors_wrangled <- readRDS('wrangled_data/neighbors_wrangled.RDS')
+webs_wrangled <- readRDS('wrangled_data/webs_wrangled.RDS')
+```
+
+# Response Variable: Search Distance
+
+For this variable, I've gone back and forth on whether I should log-transform the search distance (because it can be ran Gaussian), or whether to use a log-link function (Poisson Distribution). The poisson glm more closely matches the mean, but the log-transformation is better at capturing the variance. Each step of the way, I have performed each test to try and gauge a best route forward. The poisson glm suggests a significant difference while the log-transformed shows no difference. 
+
+```{r search distance}
+# graph raw and log-transformed distribution
+ggarrange(ggplot(sites_wrangled, aes(x = WalkDist)) +
+            geom_density(),
+          ggplot(sites_wrangled, aes(x = log(WalkDist))) +
+            geom_density(), ncol = 2)
+
+shapiro.test(sites_wrangled$WalkDist) # not normal
+shapiro.test(log(sites_wrangled$WalkDist)) # normal
+
+search_poisson <- glm(WalkDist ~ Location, data = sites_wrangled, family = poisson)
+summary(search_poisson) # overdispersed
+
+search.nb <- glm.nb(WalkDist ~ Location, data = sites_wrangled)
+summary(search.nb)
+
+search_log <- glm(log(WalkDist) ~ Location, data = sites_wrangled)
+summary(search_log)
+
+# calculate mean and standard error
+sites_wrangled %>% 
+  group_by(Location) %>% 
+  summarize(mean = mean(WalkDist),
+            se = plotrix::std.error(WalkDist))
+
+# Compare model plots
+plot_model_comparisons(data = sites_wrangled, 
+                       model_nb = search.nb, 
+                       model_poisson = search_poisson, 
+                       model_log = search_log,
+                       x_var = "Location",
+                       y_var = "WalkDist",
+                       y_limits = c(0, 275), 
+                       y_breaks = c(0, 50, 100, 150, 200, 250),
+                       y_lab = "Search Distance [m]",
+                       labels = c("***", "***", "N.S."))
+
+# Residual plots
+residual_plots(search.nb, sites_wrangled)
+residual_plots(search_log, sites_wrangled)
+```
+
+Using a negative binomial regression,  **search distance did not significantly differ between habitats** (z = -1.15, df = 1, 20, p = 0.251).
+
+# Response Variable: Number of Webs
+
+```{r number of webs}
+ggarrange(ggplot(sites_wrangled, aes(x = NumWebs)) +
+            geom_density(),
+          ggplot(sites_wrangled, aes(x = log(NumWebs))) +
+            geom_density(), ncol = 2)
+
+shapiro.test(sites_wrangled$NumWebs) # not normal
+shapiro.test(log(sites_wrangled$NumWebs)) # just normal
+
+web_poisson <- glm(NumWebs ~ Location, data = sites_wrangled, family = poisson)
+summary(web_poisson)
+
+web.nb <- glm.nb(NumWebs ~ Location, data = sites_wrangled)
+summary(web.nb)
+
+web_log <- glm(log(NumWebs) ~ Location, data = sites_wrangled)
+summary(web_log)
+
+# Calculate mean and standard error
+sites_wrangled %>% 
+  group_by(Location) %>% 
+  summarize(mean = mean(NumWebs),
+            se = plotrix::std.error(NumWebs))
+
+# Compare model plots
+plot_model_comparisons(data = sites_wrangled, 
+                       model_nb = web.nb, 
+                       model_poisson = web_poisson, 
+                       model_log = web_log,
+                       x_var = "Location",
+                       y_var = "NumWebs",
+                       y_limits = c(0, 75), 
+                       y_breaks = c(0, 15, 30, 45, 60, 75),
+                       y_lab = "Number of Webs",
+                       labels = c("***", "**", "***"))
+
+# Residual plots
+residual_plots(web.nb, sites_wrangled)
+residual_plots(web_log, sites_wrangled)
+```
+
+There were **significantly more webs at sites in the urban center** than the urban forest (z = 4.45, df = 1, 20, p < 0.001).
+
+# Response Variable: Number of Spiders
+
+```{r number of spiders}
+ggarrange(ggplot(sites_wrangled, aes(x = NumSpiders)) +
+            geom_density(),
+          ggplot(sites_wrangled, aes(x = log(NumSpiders))) +
+            geom_density(), ncol = 2)
+
+shapiro.test(sites_wrangled$NumSpiders) # not normal
+shapiro.test(log(sites_wrangled$NumSpiders)) # not normal
+
+spider_poisson <- glm(NumSpiders ~ Location, data = sites_wrangled, family = poisson)
+summary(spider_poisson)
+
+spider.nb <- glm.nb(NumSpiders ~ Location, data = sites_wrangled)
+summary(spider.nb)
+
+spider_log <- glm(log(NumSpiders) ~ Location, data = sites_wrangled)
+summary(spider_log)
+
+# Calculate mean and standard error
+sites_wrangled %>% 
+  group_by(Location) %>% 
+  summarize(mean = mean(NumSpiders),
+            se = plotrix::std.error(NumSpiders))
+
+# Compare model plots
+plot_model_comparisons(data = sites_wrangled, 
+                       model_nb = spider.nb, 
+                       model_poisson = spider_poisson, 
+                       model_log = spider_log,
+                       x_var = "Location",
+                       y_var = "NumSpiders",
+                       y_limits = c(0, 25), 
+                       y_breaks = c(0, 5, 10, 15, 20, 25),
+                       y_lab = "Number of Spiders",
+                       labels = c("***", ".", "**"))
+
+# Residual plots
+residual_plots(spider.nb, sites_wrangled)
+residual_plots(spider_log, sites_wrangled)
+```
+
+The **number of spiders present by site is significantly higher in the urban center** (z = 3.13, df = 1, 20, p = 0.002).
+
+# Response Variable: Nearest Neighbor Distances
+
+```{r neighbor distance stats}
+ggarrange(ggplot(neighbors_wrangled, aes(x = RetreatDist)) +
+            geom_density(),
+          ggplot(neighbors_wrangled, aes(x = log(RetreatDist))) +
+            geom_density(), ncol = 2)
+
+shapiro.test(neighbors_wrangled$RetreatDist) # not normal
+shapiro.test(log(neighbors_wrangled$RetreatDist)) # not normal
+
+neighbor_poisson <- glmer(round(RetreatDist, 0) ~ Location * factor(Neighbor) + (1 | ID), data = neighbors_wrangled, family = poisson)
+summary(neighbor_poisson)
+
+neighbor.nb <- glmer.nb(round(RetreatDist, 0) ~ Location * factor(Neighbor) + (1 | ID), data = neighbors_wrangled)
+summary(neighbor.nb)
+
+neighbor_log <- lmer(log(RetreatDist) ~ Location * factor(Neighbor) + (1 | ID), data = neighbors_wrangled)
+coefs <- data.frame(coef(summary(neighbor_log)))
+coefs$p.z <- 2 * (1 - pnorm(abs(coefs$t.value)))
+coefs
+
+# Both methods yield similar results
+neighbors_wrangled %>% 
+  group_by(Location) %>% 
+  summarize(mean = mean(RetreatDist),
+            se = plotrix::std.error(RetreatDist))
+```
+
+```{r neighbor distance plots}
+# Negative Binomial
+predictions <- expand.grid(Location = levels(factor(neighbors_wrangled$Location)), Neighbor = levels(factor(neighbors_wrangled$Neighbor)))
+predictions$response <- predict(neighbor.nb, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+#bigBoot_neighbors_nb <- bootMer(neighbor.nb, get_predictions, nsim = 1000)
+#saveRDS(bigBoot_neighbors_nb, file = "bootstrapping/bigBoot_neighbors_nb.Rds")
+bigBoot_neighbors_nb <- readRDS("bootstrapping/bigBoot_neighbors_nb.Rds") 
+predSE <- t(apply(bigBoot_neighbors_nb$t, MARGIN = 2, FUN = sd, na.rm = TRUE))
+predictions$SE <- predSE[1, ]
+#predictions2 <- summary(emmeans(neighbor.nb, ~Location | Neighbor,type = "response"))
+
+neighbors_nb_plot <- ggplot(neighbors_wrangled, aes(x = Neighbor, y = RetreatDist)) + 
+  geom_jitter(aes(color = Location), alpha = 0.5, width = 0.1) +
+    geom_line(aes(x = Neighbor, y = response, group = Location), size = 2, data = predictions, color = "grey") +
+  geom_point(aes(x = Neighbor, y = response, color = Location), size = 2, data = predictions) + 
+  geom_errorbar(aes(x = Neighbor, 
+                  ymin = response - SE, 
+                  ymax = response + SE,
+                  color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1) +
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+  theme_classic() +
+  scale_y_continuous(limits = c(-50, 1050), breaks = c(0, 200, 400, 600, 800, 1000)) +
+  xlab("Nearest Neighbors") +
+  ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(legend.position = "none")
+
+# raw data
+raw <- neighbors_wrangled %>% 
+  group_by(Location, Neighbor) %>% 
+  summarise(mean = mean(RetreatDist),
+            se = plotrix::std.error(RetreatDist))
+
+
+neighbors_raw_plot <- ggplot(neighbors_wrangled, aes(x = Neighbor, y = RetreatDist)) + 
+  geom_jitter(aes(color = Location), alpha = 0.5, width = 0.1) +
+  geom_point(aes(x = Neighbor, y = mean, color = Location), size = 2, data = raw) +
+  geom_line(aes(x = Neighbor, y = mean, group = Location), size = 2, data = raw, color = "grey") +
+  geom_errorbar(aes(x= Neighbor, 
+                    ymin = mean - se, 
+                    ymax = mean + se, 
+                    color = Location), data = raw, inherit.aes = FALSE, width = 0.15, size = 1.5) +
+    scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+    scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+    theme_classic() +
+    scale_y_continuous(limits = c(-50, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
+    xlab("Nearest Neighbors") +
+    ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10)) +
+    theme(legend.position = "none")
+
+# Non-transformed, poisson distribution
+predictions <- expand.grid(Location = levels(factor(neighbors_wrangled$Location)), Neighbor = levels(factor(neighbors_wrangled$Neighbor)))
+predictions$response <- predict(neighbor_poisson, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+#bigBoot_neighbors_poisson <- bootMer(neighbor_poisson, get_predictions, nsim = 1000)
+#saveRDS(bigBoot_neighbors_poisson, file = "bootstrapping/bigBoot_neighbors_poisson.Rds")
+bigBoot_neighbors_poisson <- readRDS("bootstrapping/bigBoot_neighbors_poisson.Rds")
+predSE <- t(apply(bigBoot_neighbors_poisson$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+#predictions2 <- summary(emmeans(neighbor_poisson, ~Location | Neighbor,type = "response"))
+
+neighbors_poisson_plot <- ggplot(neighbors_wrangled, aes(x = Neighbor, y = RetreatDist)) + 
+  geom_jitter(aes(color = Location), alpha = 0.5, width = 0.1) +
+  geom_point(aes(x = Neighbor, y = response, color = Location), size = 2, data = predictions) + 
+  geom_line(aes(x = Neighbor, y = response, group = Location), size = 2, data = predictions, color = "grey") +
+  geom_errorbar(aes(x = Neighbor, 
+                  ymin = response - SE, 
+                  ymax = response + SE,
+                  color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1.5) +
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+  theme_classic() +
+  scale_y_continuous(limits = c(-50, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
+  xlab("Nearest Neighbors") +
+  ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10)) +
+  theme(legend.position = "none")
+
+# Let's look at the log-transformed response variable since that is normal
+predictions <- expand.grid(Location = levels(factor(neighbors_wrangled$Location)), Neighbor = levels(factor(neighbors_wrangled$Neighbor)))
+predictions$response <- predict(neighbor_log, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+#bigBoot_neighbors_log <- bootMer(neighbor_log, get_predictions, nsim = 1000)
+#saveRDS(bigBoot_neighbors_log, file = "bootstrapping/bigBoot_neighbors_log.Rds")
+bigBoot_neighbors_log <- readRDS("bootstrapping/bigBoot_neighbors_log.Rds")
+predSE <- t(apply(bigBoot_neighbors_log$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+#predictions2 <- summary(emmeans(neighbor_log, ~Location | Neighbor,type = "response"))
+
+neighbors_log_plot <- ggplot(neighbors_wrangled, aes(x = Neighbor, y = (RetreatDist))) + 
+  geom_jitter(aes(color = Location), alpha = 0.5, width = 0.1) +
+  geom_point(aes(x = Neighbor, y = exp(response), color = Location), size = 2, data = predictions) + 
+  geom_line(aes(x = Neighbor, y = exp(response), group = Location), size = 2, data = predictions, color = "grey") +
+  geom_errorbar(aes(x = Neighbor, 
+                  ymin = exp(response - SE), 
+                  ymax = exp(response + SE),
+                  color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1.5) +
+  scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+  scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+  theme_classic() +
+  scale_y_continuous(limits = c(-50, 1000), breaks = c(0, 200, 400, 600, 800, 1000)) +
+  xlab("Nearest Neighbors") +
+  ylab("Distance from Focal Web \nto Neighbor Web [cm]") + 
+  theme(text = element_text(size = 10)) + 
+  theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+  theme(axis.text.y = element_text(colour = "black", size = 10))
+
+ggarrange(neighbors_raw_plot, 
+          neighbors_poisson_plot, 
+          neighbors_log_plot, 
+          neighbors_nb_plot,
+          labels = c("Raw Data", "Poisson Distribution", "Log-Transformed", "Negative Binomial"),
+          nrow = 1, 
+          common.legend = TRUE)
+```
+
+```{r neighbor distance residual plots}
+# Negative Binomial
+test_nb <- augment(neighbor.nb, data = neighbors_wrangled)
+resid_nb <- ggplot(test_nb, aes(x = .fitted, y = .resid)) + 
+  geom_point() + 
+  geom_smooth() +
+  geom_hline(yintercept = 0) +
+  xlab("Fitted Values") +
+  ylab("Standardized \nResiduals") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))
+
+y <- quantile(test_nb$.resid, c(0.25, 0.75))
+x <- qnorm(c(0.25, 0.75))
+slope <- diff(y)/diff(x)
+int <- y[1L] - slope * x[1L]
+
+qq_nb <- ggplot(test_nb, aes(sample = .resid)) + 
+  stat_qq() + 
+  geom_abline(slope = slope, intercept = int) +
+  xlab("Theoretical Quantiles") +
+  ylab("Sample Quantiles") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))  
+
+scaleloc_nb <- ggplot(test_nb, aes(x = .fitted, y = sqrt(abs(.resid)))) + 
+  geom_point() + 
+  geom_smooth() + 
+  geom_hline(yintercept = 0.83) +
+  xlab("Fitted Values") +
+  ylab("Sqrt Standardized \nResiduals") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))  
+
+lev_nb <- ggplot(test_nb, aes(.hat, .resid)) +
+ geom_vline(colour = "black", xintercept = 0) +
+  geom_hline(colour = "black", yintercept = 0) +
+  geom_point(aes(size = .cooksd)) + geom_smooth(se = FALSE) +
+  xlab("Theoretical Quantiles") +
+  ylab("Sample Quantiles") +
+  labs(size = "Cook's \nDistance") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14)) 
+
+ggarrange(resid_nb, qq_nb, scaleloc_nb, lev_nb, 
+          labels = c("A", "B", "C", "D"),
+          ncol = 2, nrow = 2)
+
+# Log-transformed, Normal
+test_log <- augment(neighbor_log, data = neighbors_wrangled)
+resid_log <- ggplot(test_log, aes(x = .fitted, y = .resid)) + 
+  geom_point() + 
+  geom_smooth() +
+  geom_hline(yintercept = 0) +
+  xlab("Fitted Values") +
+  ylab("Standardized \nResiduals") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))
+
+y <- quantile(test_log$.resid, c(0.25, 0.75))
+x <- qnorm(c(0.25, 0.75))
+slope <- diff(y)/diff(x)
+int <- y[1L] - slope * x[1L]
+
+qq_log <- ggplot(test_log, aes(sample = .resid)) + 
+  stat_qq() + 
+  geom_abline(slope = slope, intercept = int) +
+  xlab("Theoretical Quantiles") +
+  ylab("Sample Quantiles") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))  
+
+scaleloc_log <- ggplot(test_log, aes(x = .fitted, y = sqrt(abs(.resid)))) + 
+  geom_point() + 
+  geom_smooth() + 
+  geom_hline(yintercept = 0.83) +
+  xlab("Fitted Values") +
+  ylab("Sqrt Standardized \nResiduals") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))  
+
+lev_log <- ggplot(test_log, aes(.hat, .resid)) +
+ geom_vline(colour = "black", xintercept = 0) +
+  geom_hline(colour = "black", yintercept = 0) +
+  geom_point(aes(size = .cooksd)) + geom_smooth(se = FALSE) +
+  xlab("Theoretical Quantiles") +
+  ylab("Sample Quantiles") +
+  labs(size = "Cook's \nDistance") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14)) 
+
+ggarrange(resid_log, qq_log, scaleloc_log, lev_log, 
+          labels = c("A", "B", "C", "D"),
+          ncol = 2, nrow = 2)
+```
+
+Spider neighbors were **significantly closer in the urban center** than the urban forest (z = -1.83, df = 1, 21, p < 0.001). The **second neighbor was always further from the focal web** than the first (z = 2.83, df = 1, 21, p = 0.005), as this is how we defined the first and second neighbor. There was **no interaction between location and neighbor** (z = -1.09, df = 1, 21, p = 0.276) - the distance between the first and second neighbor did not differ between the urban center and the urban forest.
+
+# Response Variable: Web Height
+
+```{r web height stats}
+ggarrange(ggplot(webs_wrangled, aes(x = RetreatHeight)) +
+            geom_density(),
+          ggplot(webs_wrangled, aes(x = log(RetreatHeight))) +
+            geom_density(), ncol = 2)
+
+shapiro.test(webs_wrangled$RetreatHeight) # not normal
+shapiro.test(log(webs_wrangled$RetreatHeight)) # not normal
+
+# retreat height
+height_poisson <- glmer(round(RetreatHeight, 0) ~ Location + (1 | ID), data = webs_wrangled, family = poisson)
+summary(height_poisson)
+
+height.nb <- glmer.nb(round(RetreatHeight, 0) ~ Location + (1 | ID), data = webs_wrangled)
+summary(height.nb)
+
+height_log <- lmer(log(RetreatHeight) ~ Location + (1 | ID), data = webs_wrangled)
+summary(height_log)
+
+# substrate height
+subheight.nb <- glmer.nb(round(SubHeight, 0) ~ Location + (1 | ID), data = webs_wrangled)
+summary(subheight.nb)
+
+# proportion retreat height to substrate height
+height_prop <- glmmTMB(Proportion ~ Location + (1|ID), data = webs_wrangled, family = "beta")
+summary(height_prop)
+```
+
+```{r web heights plots}
+# Negative Binomial
+predictions <- expand.grid(Location = levels(factor(webs_wrangled$Location)))
+predictions$response <- predict(height.nb, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+#bigBoot_height_nb <- bootMer(height.nb, get_predictions, nsim = 1000)
+#saveRDS(bigBoot_height_nb, file = "bootstrapping/bigBoot_height_nb.Rds")
+bigBoot_height_nb <- readRDS("bootstrapping/bigBoot_height_nb.Rds")
+predSE <- t(apply(bigBoot_height_nb$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+#predictions2 <- summary(emmeans(height.nb, ~Location | Neighbor,type = "response"))
+
+height_nb_plot <- ggplot(webs_wrangled, aes(x = Location, y = RetreatHeight)) + 
+  geom_jitter(color = "grey", width = 0.1) +
+  geom_point(aes(x = Location, y = response, color = Location), size = 2, data = predictions) +
+  geom_errorbar(aes(x= Location, 
+                    ymin = response - SE, 
+                    ymax = response + SE, 
+                    color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1) +
+    scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+    scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 30", "Urban Center" = "Urban \nCenter \nN = 101")) +
+    theme_classic() +
+    scale_y_continuous(limits = c(0, 210), breaks = c(0, 35, 70, 105, 140, 175, 210)) +
+    ylab("Web Height [cm]") + 
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
+        axis.title.x = element_blank()) +
+    theme(legend.position = "none") +
+    annotate(geom = "text", x = 1.5, y = 210, label = "*", color = "black", size = 5)
+
+# raw data
+raw <- webs_wrangled %>% 
+  group_by(Location) %>% 
+  summarise(mean = mean(RetreatHeight),
+            se = plotrix::std.error(RetreatHeight))
+
+
+height_raw_plot <- ggplot(webs_wrangled, aes(x = Location, y = RetreatHeight)) + 
+  geom_jitter(color = "grey", width = 0.1) +
+  geom_point(aes(x = Location, y = mean, color = Location), size = 2, data = raw) +
+  geom_errorbar(aes(x= Location, 
+                    ymin = mean - se, 
+                    ymax = mean + se, 
+                    color = Location), data = raw, inherit.aes = FALSE, width = 0.15, size = 1.5) +
+    scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+    scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+    theme_classic() +
+    scale_y_continuous(limits = c(0, 210), breaks = c(0, 35, 70, 105, 140, 175, 210)) +
+    ylab("Web Height [cm]") + 
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
+        axis.title.x = element_blank()) +
+    theme(legend.position = "none")
+
+# Non-transformed, poisson distribution
+predictions <- expand.grid(Location = levels(factor(webs_wrangled$Location)))
+predictions$response <- predict(height_poisson, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+#bigBoot_height_poisson <- bootMer(height_poisson, get_predictions, nsim = 1000)
+#saveRDS(bigBoot_height_poisson, file = "bootstrapping/bigBoot_height_poisson.Rds")
+bigBoot_height_poisson <- readRDS("bootstrapping/bigBoot_height_poisson.Rds")
+predSE <- t(apply(bigBoot_height_poisson$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+#predictions2 <- summary(emmeans(height_poisson, ~Location | Neighbor,type = "response"))
+
+height_poisson_plot <- ggplot(webs_wrangled, aes(x = Location, y = RetreatHeight)) + 
+  geom_jitter(color = "grey", width = 0.1) +
+  geom_point(aes(x = Location, y = response, color = Location), size = 2, data = predictions) +
+  geom_errorbar(aes(x= Location, 
+                    ymin = response - SE, 
+                    ymax = response + SE, 
+                    color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1.5) +
+    scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+    scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+    theme_classic() +
+    scale_y_continuous(limits = c(0, 210), breaks = c(0, 35, 70, 105, 140, 175, 210)) +
+    ylab("Web Height [cm]") + 
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
+        axis.title.x = element_blank()) +
+    theme(legend.position = "none") +
+    annotate(geom = "text", x = 1.5, y = 210, label = "*", color = "black", size = 5)
+
+
+# Let's look at the log-transformed response variable since that is normal
+predictions <- expand.grid(Location = levels(factor(webs_wrangled$Location)))
+predictions$response <- predict(height_log, newdata = predictions, se.fit = TRUE, re.form = NA, type = "response")
+
+#bigBoot_height_log <- bootMer(height_log, get_predictions, nsim = 1000)
+#saveRDS(bigBoot_height_log, file = "bootstrapping/bigBoot_height_log.Rds")
+bigBoot_height_log <- readRDS("bootstrapping/bigBoot_height_log.Rds")
+predSE <- t(apply(bigBoot_height_log$t, MARGIN = 2, FUN = sd))
+predictions$SE <- predSE[1, ]
+#predictions2 <- summary(emmeans(height_log, ~Location | Neighbor,type = "response"))
+
+height_log_plot <- ggplot(webs_wrangled, aes(x = Location, y = (RetreatHeight))) + 
+  geom_jitter(color = "grey", width = 0.1) +
+  geom_point(aes(x = Location, y = exp(response), color = Location), size = 2, data = predictions) +
+  geom_errorbar(aes(x= Location, 
+                    ymin = exp(response - SE), 
+                    ymax = exp(response + SE), 
+                    color = Location), data = predictions, inherit.aes = FALSE, width = 0.15, size = 1.5) +
+    scale_color_manual(values = c("Urban Center" = "#d95f02", "Urban Forest" = "#1b9e77")) +
+    scale_x_discrete(labels=c("Urban Forest" = "Urban \nForest \nN = 10", "Urban Center" = "Urban \nCenter \nN = 12")) +
+    theme_classic() +
+    scale_y_continuous(limits = c(0, 210), breaks = c(0, 35, 70, 105, 140, 175, 210)) +
+    ylab("Web Height [cm]") + 
+    theme(text = element_text(size = 10)) + 
+    theme(axis.text.x = element_text(colour = "black", size = 10)) + 
+    theme(axis.text.y = element_text(colour = "black", size = 10),
+        axis.title.x = element_blank()) +
+    theme(legend.position = "none") +
+    annotate(geom = "text", x = 1.5, y = 210, label = "*", color = "black", size = 5)
+
+ggarrange(height_raw_plot, 
+          height_poisson_plot, 
+          height_log_plot,
+          height_nb_plot,
+          labels = c("Raw Data", "Poisson Distribution", "Log-Transformed", "Negative Binomial"),
+          nrow = 1, 
+          common.legend = TRUE)
+```
+
+```{r web heights residual plots}
+# Negative Binomial
+test_nb <- augment(height.nb, data = webs_wrangled)
+resid_nb <- ggplot(test_nb, aes(x = .fitted, y = .resid)) + 
+  geom_point() + 
+  geom_smooth() +
+  geom_hline(yintercept = 0) +
+  xlab("Fitted Values") +
+  ylab("Standardized \nResiduals") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))
+
+y <- quantile(test_nb$.resid, c(0.25, 0.75))
+x <- qnorm(c(0.25, 0.75))
+slope <- diff(y)/diff(x)
+int <- y[1L] - slope * x[1L]
+
+qq_nb <- ggplot(test_nb, aes(sample = .resid)) + 
+  stat_qq() + 
+  geom_abline(slope = slope, intercept = int) +
+  xlab("Theoretical Quantiles") +
+  ylab("Sample Quantiles") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))  
+
+scaleloc_nb <- ggplot(test_nb, aes(x = .fitted, y = sqrt(abs(.resid)))) + 
+  geom_point() + 
+  geom_smooth() + 
+  geom_hline(yintercept = 0.83) +
+  xlab("Fitted Values") +
+  ylab("Sqrt Standardized \nResiduals") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))  
+
+lev_nb <- ggplot(test_nb, aes(.hat, .resid)) +
+ geom_vline(colour = "black", xintercept = 0) +
+  geom_hline(colour = "black", yintercept = 0) +
+  geom_point(aes(size = .cooksd)) + geom_smooth(se = FALSE) +
+  xlab("Theoretical Quantiles") +
+  ylab("Sample Quantiles") +
+  labs(size = "Cook's \nDistance") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14)) 
+
+ggarrange(resid_nb, qq_nb, scaleloc_nb, lev_nb, 
+          labels = c("A", "B", "C", "D"),
+          ncol = 2, nrow = 2)
+
+# Log-transformed, Normal
+test_log <- augment(height_log, data = webs_wrangled)
+resid_log <- ggplot(test_log, aes(x = .fitted, y = .resid)) + 
+  geom_point() + 
+  geom_smooth() +
+  geom_hline(yintercept = 0) +
+  xlab("Fitted Values") +
+  ylab("Standardized \nResiduals") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))
+
+y <- quantile(test_log$.resid, c(0.25, 0.75))
+x <- qnorm(c(0.25, 0.75))
+slope <- diff(y)/diff(x)
+int <- y[1L] - slope * x[1L]
+
+qq_log <- ggplot(test_log, aes(sample = .resid)) + 
+  stat_qq() + 
+  geom_abline(slope = slope, intercept = int) +
+  xlab("Theoretical Quantiles") +
+  ylab("Sample Quantiles") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))  
+
+scaleloc_log <- ggplot(test_log, aes(x = .fitted, y = sqrt(abs(.resid)))) + 
+  geom_point() + 
+  geom_smooth() + 
+  geom_hline(yintercept = 0.83) +
+  xlab("Fitted Values") +
+  ylab("Sqrt Standardized \nResiduals") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14))  
+
+lev_log <- ggplot(test_log, aes(.hat, .resid)) +
+ geom_vline(colour = "black", xintercept = 0) +
+  geom_hline(colour = "black", yintercept = 0) +
+  geom_point(aes(size = .cooksd)) + geom_smooth(se = FALSE) +
+  xlab("Theoretical Quantiles") +
+  ylab("Sample Quantiles") +
+  labs(size = "Cook's \nDistance") +
+  theme_classic() +
+  theme(text = element_text(size = 14, color = "black")) +
+  theme(axis.text.x=element_text(color="black", size=14)) + 
+  theme(axis.text.y=element_text(color="black", size=14)) 
+
+ggarrange(resid_log, qq_log, scaleloc_log, lev_log, 
+          labels = c("A", "B", "C", "D"),
+          ncol = 2, nrow = 2)
+```
+
+**Webs are significantly higher in the urban forest** than the urban center (z = -2.44, df = 1, 21, p = 0.015). 

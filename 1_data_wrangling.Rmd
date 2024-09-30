@@ -1,0 +1,104 @@
+---
+title: "Data Wrangling for Analysis Setup"
+author: "Brandi Pessman"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+# Setting the Working Directory and Global Code Chunk Options
+
+I have set message and warning to FALSE for every chunk so the knitted document does not include messages and warnings. 
+
+```{r setup}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/bjpessman/Documents/phd_research_code/Agelenopsis_aggregation")
+```
+
+# Packages to Load
+
+```{r packages}
+library(tidyverse) # we will mostly use dplyr for wrangling
+```
+
+# Import the Data from the data/ folder
+
+```{r import}
+webs <- read.table(file = "data/webs.txt", header = TRUE) # includes data for every measured web (multiple per site)
+sites <- read.table(file = "data/sites.txt", header = TRUE) # includes whole site characteristics
+```
+
+# Wrangling the Webs Dataset
+
+Here, we rename some levels of factors Location and Land and put them in the order we want the categories to appear in a graph. We use "webs_wrangled" to compare measurements taken of each web at each site. We use "sites_wrangled" to compare search distance, the number of webs, and the number of spiders between sites. The "neighbors_wrangled" data set is a subset of "webs" that looks at the distance from the focal web to the nearest and second nearest neighbors. 
+
+NOTE: At one time, we tried scaling and centering the data in difference ways. We didn't scale and center because log-transformations on right-skewed variables were enough to remove convergence errors.
+
+```{r wrangling webs}
+webs_wrangled <- webs %>% 
+  mutate(ID = factor(ID), # make spider ID a factor
+         Location = factor(Location), # make location a factor so we can recode and relevel it
+         Location = fct_recode(Location, 
+                               "Urban Forest" = "Forest",
+                               "Urban Center" = "Campus"), # recode the location
+         Location = fct_relevel(Location, 
+                                "Urban Center", "Urban Forest")) # make sure urban center comes before urban forest 
+
+webs_wrangled$RetreatHeight[webs_wrangled$RetreatHeight == 0] <- 0.1 # zero entry causes issues later; web with height 0.1cm is similar to 0 cm
+```
+
+```{r wrangling sites}
+sites_wrangled <- sites %>% 
+  mutate(ID = factor(ID), # make spider ID a factor
+         Location = factor(Location), # make location a factor so we can recode and relevel it
+         Land = factor(Land), # make land a factor so we can recode and relevel it
+         Location = fct_recode(Location, 
+                               "Urban Forest" = "Forest",
+                               "Urban Center" = "Campus"), # recode the location
+         Location = fct_relevel(Location, 
+                                "Urban Center", "Urban Forest"), # make sure urban center comes before urban forest 
+         Land = fct_recode(Land, 
+                           "Urban, High" = "UrbanizedHighIntensity",
+                           "Urban, Medium" = "UrbanizedMediumIntensity",
+                           "Urban, Low" = "UrbanizedLowIntensity",
+                           "Deciduous Forest" = "DeciduousForest",
+                           "Woody Wetlands" = "WoodyWetlands"), # recode the land variable
+         Land = fct_relevel(Land, 
+                            "Urban, High", 
+                            "Urban, Medium", 
+                            "Urban, Low", 
+                            "Deciduous Forest", 
+                            "Woody Wetlands"),# relevel the factors of the land variable
+         log_TotalSub = log(TotalSub), # log transformation
+         log_tdr = log(dist_traffic_road), # log transformation
+         log_tdh = log(dist_traffic_highway), # log transformation
+         log_patch = log(patch_area_km), # log transformation
+         ) %>% 
+    dplyr::select(-patch_area_km, -Tree, -Imperv, -road_dist_m:-highway_year) %>%  # remove variables that are unused
+    rename("Traffic_Dist_Road" = "dist_traffic_road", 
+           "Traffic_Dist_Highway" = "dist_traffic_highway")
+```
+
+# Add environmental variables to webs_wrangled
+
+```{r merge}
+env <- sites_wrangled %>% 
+  dplyr::select(ID, Land, tree100m, imperv100m, spec_rad, light_rad, road_length_m, trail_length_m, log_TotalSub, log_tdr, log_tdh, log_patch)
+webs_wrangled <- left_join(webs_wrangled, env, by = "ID")
+```
+
+```{r neighbors dataset}
+neighbors_wrangled <- webs_wrangled %>% 
+  filter(RetreatDist != 0, # remove the focal web
+         RetreatDist < 1000, # only include webs less than 10 meters away
+         Web == "W002" | Web == "W003") %>% # keep only the two nearest neighbor measurements
+  mutate(Neighbor = ifelse(Web == "W002", "1", "2")) # create a new label with 1 as the nearest neighbor and 2 as the second nearest
+```
+
+# Save Wrangled Datasets to wrangled_data
+
+```{r saving datasets}
+saveRDS(webs_wrangled, 'wrangled_data/webs_wrangled.rds')
+saveRDS(sites_wrangled, 'wrangled_data/sites_wrangled.rds')
+saveRDS(neighbors_wrangled, 'wrangled_data/neighbors_wrangled.rds')
+```
